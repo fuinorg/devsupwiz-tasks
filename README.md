@@ -16,7 +16,7 @@ Sets a new hostname for the virtual machine (VM).
 <set-hostname task-class="org.fuin.devsupwiz.tasks.hostname.SetHostnameTask" />
 ```
 
-<a href="https://github.com/fuinorg/devsupwiz-tasks/raw/master/tasks/doc/set-hostname.png" target="_blank"><img src="https://github.com/fuinorg/devsupwiz-tasks/raw/master/tasks/doc/set-hostname.png" width="320" height="335" alt="Set hostname screen"></a>
+<a href="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/set-hostname.png" target="_blank"><img src="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/set-hostname.png" width="320" height="335" alt="Set hostname screen"></a>
 
 # create-git-config
 Creates and populates the "~/.gitconfig" file.
@@ -24,7 +24,7 @@ Creates and populates the "~/.gitconfig" file.
 <create-git-config task-class="org.fuin.devsupwiz.tasks.gitsetup.CreateGitConfigTask" />
 ```
 
-<a href="https://github.com/fuinorg/devsupwiz-tasks/raw/master/tasks/doc/create-git-config.png" target="_blank"><img src="https://github.com/fuinorg/devsupwiz-tasks/raw/master/tasks/doc/create-git-config.png" width="320" height="335" alt="Create git config screen"></a>
+<a href="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/create-git-config.png" target="_blank"><img src="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/create-git-config.png" width="320" height="335" alt="Create git config screen"></a>
 
 # setup-git-ssh
 Generates a new key pair and adds it to the "~/.ssh/config" file. The public key is also submitted to the git provider (Bitbucket, Github) using a REST API.
@@ -33,7 +33,7 @@ Generates a new key pair and adds it to the "~/.ssh/config" file. The public key
            task-class="org.fuin.devsupwiz.tasks.gitsetup.SetupGitSshTask" />
 ```
 
-<a href="https://github.com/fuinorg/devsupwiz-tasks/raw/master/tasks/doc/setup-git-ssh.png" target="_blank"><img src="https://github.com/fuinorg/devsupwiz-tasks/raw/master/tasks/doc/setup-git-ssh.png" width="320" height="335" alt="Setup git ssh"></a>
+<a href="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/setup-git-ssh.png" target="_blank"><img src="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/setup-git-ssh.png" width="320" height="335" alt="Setup git ssh"></a>
 
 # git-clone
 Clones one or more git repositories. Requires that a valid SSH key is installed (See "setup-git-ssh" task).
@@ -45,5 +45,5 @@ Clones one or more git repositories. Requires that a valid SSH key is installed 
 </git-clone>
 ```
 
-<a href="https://github.com/fuinorg/devsupwiz-tasks/raw/master/tasks/doc/clone-git-repositories.png" target="_blank"><img src="https://github.com/fuinorg/devsupwiz-tasks/raw/master/tasks/doc/clone-git-repositories.png" width="320" height="335" alt="Setup git ssh"></a>
+<a href="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/clone-git-repositories.png" target="_blank"><img src="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/clone-git-repositories.png" width="320" height="335" alt="Setup git ssh"></a>
 
