@@ -1,0 +1,51 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+	<servers>
+
+		<server>
+			<id>m2-private</id>
+			<username>${DEV_USER}</username>
+			<password>${DEV_PW}</password>
+		</server>
+
+	</servers>
+
+	<profiles>
+
+		<profile>
+
+			<id>standard</id>
+
+			<properties>
+				<DEV_USER>((USER))</DEV_USER>
+				<DEV_PW>((PW))</DEV_PW>
+			</properties>
+
+			<repositories>
+
+				<repository>
+					<id>m2-private</id>
+					<name>My private Maven repository</name>
+					<url>https://my-server-with-maven-repo.com/m2-private</url>
+					<releases>
+						<enabled>true</enabled>
+					</releases>
+					<snapshots>
+						<enabled>true</enabled>
+						<updatePolicy>always</updatePolicy>
+					</snapshots>
+				</repository>
+
+			</repositories>
+
+		</profile>
+
+	</profiles>
+
+	<activeProfiles>
+		<activeProfile>standard</activeProfile>
+	</activeProfiles>
+
+</settings>
