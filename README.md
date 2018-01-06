@@ -1,5 +1,5 @@
 # devsupwiz-tasks
-Common tasks for the JavaFX based wizard (dev-setup-wizard).
+Common tasks for the JavaFX based wizard ([dev-setup-wizard](https://github.com/fuinorg/dev-setup-wizard)).
 
 [![Build Status](https://fuin-org.ci.cloudbees.com/job/devsupwiz-tasks/badge/icon)](https://fuin-org.ci.cloudbees.com/job/devsupwiz-tasks/)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.fuin.devsupwiz/devsupwiz-tasks/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.fuin.devsupwiz/devsupwiz-tasks/)
