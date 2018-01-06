@@ -47,3 +47,27 @@ Clones one or more git repositories. Requires that a valid SSH key is installed 
 
 <a href="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/clone-git-repositories.png" target="_blank"><img src="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/clone-git-repositories.png" width="320" height="335" alt="Setup git ssh"></a>
 
+
+* * *
+
+## Snapshots
+
+Snapshots can be found on the [OSS Sonatype Snapshots Repository](http://oss.sonatype.org/content/repositories/snapshots/org/fuin "Snapshot Repository"). 
+
+Add the following to your .m2/settings.xml to enable snapshots in your Maven build:
+
+```xml
+<repository>
+    <id>sonatype.oss.snapshots</id>
+    <name>Sonatype OSS Snapshot Repository</name>
+    <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+    <releases>
+        <enabled>false</enabled>
+    </releases>
+    <snapshots>
+        <enabled>true</enabled>
+    </snapshots>
+</repository>
+```
+
+ 
