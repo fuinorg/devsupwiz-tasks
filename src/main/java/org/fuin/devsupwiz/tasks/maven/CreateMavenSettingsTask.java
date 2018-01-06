@@ -17,6 +17,8 @@
  */
 package org.fuin.devsupwiz.tasks.maven;
 
+import static java.nio.file.attribute.PosixFilePermission.OWNER_READ;
+import static java.nio.file.attribute.PosixFilePermission.OWNER_WRITE;
 import static org.fuin.devsupwiz.common.DevSupWizUtils.MDC_TASK_KEY;
 
 import java.io.File;
@@ -33,6 +35,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.fuin.devsupwiz.common.DevSupWizUtils;
 import org.fuin.devsupwiz.common.SetupTask;
 import org.fuin.devsupwiz.common.ValidateInstance;
 import org.fuin.utils4j.Utils4J;
@@ -236,6 +239,10 @@ public class CreateMavenSettingsTask implements SetupTask {
                     FileUtils.writeStringToFile(settingsFile, pwAndNameReplaced,
                             Charset.forName("utf-8"));
 
+                    // Only owner is allowed to access settings.xml with repo pw
+                    DevSupWizUtils.setFilePermissions(settingsFile, OWNER_READ,
+                            OWNER_WRITE);
+                    
                     LOG.info("Successfully create Maven settings: {}",
                             settingsFile);
 
