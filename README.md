@@ -48,6 +48,17 @@ Clones one or more git repositories. Requires that a valid SSH key is installed 
 <a href="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/clone-git-repositories.png" target="_blank"><img src="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/clone-git-repositories.png" width="320" height="335" alt="Setup git ssh"></a>
 
 
+# create-maven-settings
+Generates a new ".m2/settings.xml" file with a user name and password to allow access to a private Maven repository.
+```xml
+<create-maven-settings id="1" template="~/git/my-project/config/settings.xml"
+    task-class="org.fuin.devsupwiz.tasks.maven.CreateMavenSettingsTask"/>
+```
+
+<a href="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/create-maven-settings.png" target="_blank"><img src="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/create-maven-settings.png" width="320" height="335" alt="Create Maven settings"></a>
+
+
+
 * * *
 
 ## Snapshots
