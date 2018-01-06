@@ -12,7 +12,7 @@
 
 	<groupId>org.fuin.devsupwiz</groupId>
 	<artifactId>devsupwiz-tasks</artifactId>
-	<version>0.2.0-SNAPSHOT</version>
+	<version>0.2.0</version>
 	<description>Common tasks for the JavaFX based wizard (dev-setup-wizard)</description>
 	<url>https://github.com/fuinorg/devsupwiz-tasks/</url>
 
@@ -34,7 +34,7 @@
 		<dependency>
 			<groupId>org.fuin.devsupwiz</groupId>
 			<artifactId>devsupwiz-common</artifactId>
-			<version>0.2.0-SNAPSHOT</version>
+			<version>0.1.1</version>
 		</dependency>
 
 		<dependency>
