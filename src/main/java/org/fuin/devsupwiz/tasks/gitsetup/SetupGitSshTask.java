@@ -39,6 +39,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.commons.io.FileUtils;
 import org.fuin.devsupwiz.common.DevSupWizUtils;
+import org.fuin.devsupwiz.common.MultipleInstancesSetupTask;
 import org.fuin.devsupwiz.common.SetupTask;
 import org.fuin.devsupwiz.common.ValidateInstance;
 import org.fuin.utils4j.Utils4J;
@@ -56,7 +57,7 @@ import com.mashape.unirest.http.exceptions.UnirestException;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = SetupGitSshTask.KEY)
-public class SetupGitSshTask implements SetupTask {
+public class SetupGitSshTask implements MultipleInstancesSetupTask {
 
     /** Unique normalized name of the task (for example used for FXML file). */
     static final String KEY = "setup-git-ssh";

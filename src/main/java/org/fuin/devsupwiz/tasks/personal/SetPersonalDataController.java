@@ -15,9 +15,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this library. If not, see http://www.gnu.org/licenses/.
  */
-package org.fuin.devsupwiz.tasks.maven;
+package org.fuin.devsupwiz.tasks.personal;
 
-import static org.fuin.devsupwiz.common.DevSupWizFxUtils.createIconError16x16;
 import static org.fuin.devsupwiz.common.DevSupWizFxUtils.createIconOk24x24;
 import static org.fuin.devsupwiz.common.DevSupWizFxUtils.createIconTodo24x24;
 import static org.fuin.devsupwiz.common.DevSupWizUtils.violated;
@@ -38,21 +37,26 @@ import org.fuin.devsupwiz.common.SetupTask;
 
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 /**
- * UI controller for Maven settings creation.
+ * UI controller for personal data configuration.
  */
 @Loggable
-public class CreateMavenSettingsController implements SetupController {
+public class SetPersonalDataController implements SetupController {
 
     @FXML
-    private TextField name;
+    private TextField firstName;
 
     @FXML
-    private PasswordField password;
+    private TextField lastName;
+
+    @FXML
+    private TextField email;
 
     @FXML
     private Label title;
@@ -60,16 +64,16 @@ public class CreateMavenSettingsController implements SetupController {
     @Inject
     private Validator validator;
 
-    private CreateMavenSettingsTask task;
+    private SetPersonalDataTask task;
 
     @Override
     public void init(final SetupTask task) {
-        if (!(task instanceof CreateMavenSettingsTask)) {
+        if (!(task instanceof SetPersonalDataTask)) {
             throw new IllegalArgumentException("Expected task of type "
-                    + CreateMavenSettingsTask.class.getName() + ", but was: "
+                    + SetPersonalDataTask.class.getName() + ", but was: "
                     + task.getClass().getName());
         }
-        this.task = (CreateMavenSettingsTask) task;
+        this.task = (SetPersonalDataTask) task;
         refreshStatus();
     }
 
@@ -81,24 +85,30 @@ public class CreateMavenSettingsController implements SetupController {
         if (!task.alreadyExecuted()) {
 
             // Execute bean validation using a new task instance
-            final CreateMavenSettingsTask t = new CreateMavenSettingsTask("y",
-                    name.getText(), password.getText());
-            final Set<ConstraintViolation<CreateMavenSettingsTask>> violations = validator
+            final SetPersonalDataTask t = new SetPersonalDataTask(
+                    firstName.getText(), lastName.getText(), email.getText());
+            final Set<ConstraintViolation<SetPersonalDataTask>> violations = validator
                     .validate(t);
-            for (final ConstraintViolation<CreateMavenSettingsTask> violation : violations) {
+            for (final ConstraintViolation<SetPersonalDataTask> violation : violations) {
                 errors.add(violation.getMessage());
             }
 
             // Show validation errors on UI
-            Decorator.removeAllDecorations(name);
-            if (violated(violations, name.getId())) {
-                Decorator.addDecoration(name, new GraphicDecoration(
-                        createIconError16x16(), Pos.TOP_RIGHT));
+            Decorator.removeAllDecorations(firstName);
+            Decorator.removeAllDecorations(lastName);
+            Decorator.removeAllDecorations(email);
+
+            if (violated(violations, firstName.getId())) {
+                Decorator.addDecoration(firstName, new GraphicDecoration(
+                        createErrorNode(), Pos.TOP_RIGHT));
             }
-            Decorator.removeAllDecorations(password);
-            if (violated(violations, password.getId())) {
-                Decorator.addDecoration(password, new GraphicDecoration(
-                        createIconError16x16(), Pos.TOP_RIGHT));
+            if (violated(violations, lastName.getId())) {
+                Decorator.addDecoration(lastName, new GraphicDecoration(
+                        createErrorNode(), Pos.TOP_RIGHT));
+            }
+            if (violated(violations, email.getId())) {
+                Decorator.addDecoration(email, new GraphicDecoration(
+                        createErrorNode(), Pos.TOP_RIGHT));
             }
 
         }
@@ -107,10 +117,15 @@ public class CreateMavenSettingsController implements SetupController {
         return errors;
     }
 
+    private Node createErrorNode() {
+        return new ImageView(new Image("/error-16x16.png"));
+    }
+
     @Override
     public void save() {
-        task.setName(name.getText());
-        task.setPassword(password.getText());
+        task.setFirstName(firstName.getText());
+        task.setLastName(lastName.getText());
+        task.setEmail(email.getText());
     }
 
     @Override
@@ -121,8 +136,9 @@ public class CreateMavenSettingsController implements SetupController {
     @Override
     public void refreshStatus() {
         final boolean alreadyExecuted = task.alreadyExecuted();
-        name.setDisable(alreadyExecuted);
-        password.setDisable(alreadyExecuted);
+        firstName.setDisable(alreadyExecuted);
+        lastName.setDisable(alreadyExecuted);
+        email.setDisable(alreadyExecuted);
         if (alreadyExecuted) {
             title.setGraphic(createIconOk24x24());
         } else {

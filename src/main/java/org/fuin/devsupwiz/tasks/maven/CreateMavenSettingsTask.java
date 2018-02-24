@@ -58,10 +58,6 @@ public class CreateMavenSettingsTask implements SetupTask {
     private static final Logger LOG = LoggerFactory
             .getLogger(CreateMavenSettingsTask.class);
 
-    @NotEmpty
-    @XmlAttribute(name = "id")
-    private String id;
-
     @NotEmpty(message = "{create-maven-settings.template.empty}")
     @XmlAttribute(name = "template")
     private String template;
@@ -89,8 +85,6 @@ public class CreateMavenSettingsTask implements SetupTask {
     /**
      * Constructor for tests.
      * 
-     * @param id
-     *            Unique task identifier.
      * @param template
      *            Source template for the "settings.xml".
      * @param name
@@ -98,18 +92,15 @@ public class CreateMavenSettingsTask implements SetupTask {
      * @param password
      *            User password.
      */
-    public CreateMavenSettingsTask(@NotEmpty final String id,
-            @NotEmpty final String template, @NotEmpty final String name,
-            @NotEmpty final String password) {
-        this(id, template, name, password,
+    public CreateMavenSettingsTask(@NotEmpty final String template,
+            @NotEmpty final String name, @NotEmpty final String password) {
+        this(template, name, password,
                 new File(Utils4J.getUserHomeDir(), M2_SETTINGS_XML));
     }
 
     /**
      * Constructor for tests.
      * 
-     * @param id
-     *            Unique task identifier.
      * @param template
      *            Source template for the "settings.xml".
      * @param name
@@ -119,11 +110,10 @@ public class CreateMavenSettingsTask implements SetupTask {
      * @param settingsFile
      *            File to create.
      */
-    public CreateMavenSettingsTask(@NotEmpty final String id,
-            @NotEmpty final String template, @NotEmpty final String name,
-            @NotEmpty final String password, @NotNull final File settingsFile) {
+    public CreateMavenSettingsTask(@NotEmpty final String template,
+            @NotEmpty final String name, @NotEmpty final String password,
+            @NotNull final File settingsFile) {
         super();
-        this.id = id;
         this.template = template;
         this.name = name;
         this.password = password;
@@ -215,7 +205,7 @@ public class CreateMavenSettingsTask implements SetupTask {
     @Override
     public void execute() {
 
-        MDC.put(MDC_TASK_KEY, getTypeId());
+        MDC.put(MDC_TASK_KEY, getType());
         try {
 
             if (!alreadyExecuted()) {
@@ -242,7 +232,7 @@ public class CreateMavenSettingsTask implements SetupTask {
                     // Only owner is allowed to access settings.xml with repo pw
                     DevSupWizUtils.setFilePermissions(settingsFile, OWNER_READ,
                             OWNER_WRITE);
-                    
+
                     LOG.info("Successfully create Maven settings: {}",
                             settingsFile);
 
@@ -272,18 +262,13 @@ public class CreateMavenSettingsTask implements SetupTask {
     }
 
     @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
     public String getType() {
         return KEY;
     }
 
     @Override
     public String getTypeId() {
-        return getType() + "[" + getId() + "]";
+        return KEY;
     }
-
+    
 }

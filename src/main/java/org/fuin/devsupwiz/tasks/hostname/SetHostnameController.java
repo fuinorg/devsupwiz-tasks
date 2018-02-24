@@ -82,7 +82,7 @@ public class SetHostnameController implements SetupController {
             name.setText(name.getText().toLowerCase());
 
             // Execute bean validation using a new task instance
-            final SetHostnameTask t = new SetHostnameTask("x", name.getText());
+            final SetHostnameTask t = new SetHostnameTask(name.getText());
             final Set<ConstraintViolation<SetHostnameTask>> violations = validator
                     .validate(t);
             for (final ConstraintViolation<SetHostnameTask> violation : violations) {

@@ -27,7 +27,6 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -56,10 +55,6 @@ public class SetHostnameTask implements SetupTask {
     @XmlTransient
     private Preferences userPrefs;
 
-    @NotEmpty
-    @XmlAttribute(name = "id")
-    private String id;
-
     @Pattern(regexp = "[a-z][a-z0-9\\-]*", message = "{set-hostname.pattern}")
     @NotEmpty(message = "{set-hostname.empty}")
     @XmlTransient
@@ -76,16 +71,12 @@ public class SetHostnameTask implements SetupTask {
     /**
      * Constructor with name.
      * 
-     * @param id
-     *            Unique task identifier.
      * @param name
      *            Host name.
      */
-    public SetHostnameTask(@NotEmpty final String id,
-            @NotEmpty final String name) {
+    public SetHostnameTask(@NotEmpty final String name) {
         super();
         userPrefs = Preferences.userRoot();
-        this.id = id;
         this.name = name;
     }
 
@@ -110,18 +101,14 @@ public class SetHostnameTask implements SetupTask {
 
     @Override
     public boolean alreadyExecuted() {
-        return userPrefs.getBoolean(getPrefKey(), false);
-    }
-    
-    private String getPrefKey() {
-        return getType() + "-" + getId();
+        return userPrefs.getBoolean(KEY, false);
     }
 
     @ValidateInstance
     @Override
     public void execute() {
 
-        MDC.put(MDC_TASK_KEY, getTypeId());
+        MDC.put(MDC_TASK_KEY, getType());
         try {
 
             if (!alreadyExecuted()) {
@@ -135,10 +122,12 @@ public class SetHostnameTask implements SetupTask {
                 final int result = executor.execute();
                 if (result == 0) {
                     try {
-                        userPrefs.putBoolean(getPrefKey(), true);
+                        userPrefs.putBoolean(KEY, true);
                         userPrefs.flush();
                     } catch (final BackingStoreException ex) {
-                        throw new RuntimeException("Failed to save the setup key '" + getPrefKey() + "'", ex);
+                        throw new RuntimeException(
+                                "Failed to save the setup key '" + KEY + "'",
+                                ex);
                     }
                     LOG.info("Successfully set the host name to '{}'", name);
                 }
@@ -163,19 +152,13 @@ public class SetHostnameTask implements SetupTask {
     }
 
     @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
     public String getType() {
         return KEY;
     }
 
     @Override
     public String getTypeId() {
-        return getType() + "[" + getId() + "]";
+        return KEY;
     }
-    
     
 }

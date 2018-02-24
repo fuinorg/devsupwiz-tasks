@@ -59,7 +59,7 @@ public class CreateMavenSettingsTaskTest {
                 utf8);
         final File targetFile = new File("target/maven-settings.xml");
         targetFile.delete();
-        final CreateMavenSettingsTask testee = new CreateMavenSettingsTask("x",
+        final CreateMavenSettingsTask testee = new CreateMavenSettingsTask(
                 templateFile.toString(), "peter.parker", "secret123",
                 targetFile);
 
@@ -99,7 +99,7 @@ public class CreateMavenSettingsTaskTest {
         // PREPARE
         final File targetFile = new File("target/maven-settings.xml");
         targetFile.delete();
-        final CreateMavenSettingsTask testee = new CreateMavenSettingsTask("x",
+        final CreateMavenSettingsTask testee = new CreateMavenSettingsTask(
                 "~/.m2/settings.xml", "peter.parker", "secret123", targetFile);
 
         // TEST
@@ -108,7 +108,7 @@ public class CreateMavenSettingsTaskTest {
 
         // VERIFY
         final Diff documentDiff = DiffBuilder.compare(JaxbUtils.XML_PREFIX
-                + "<create-maven-settings id=\"x\" template=\"~/.m2/settings.xml\"/>")
+                + "<create-maven-settings template=\"~/.m2/settings.xml\"/>")
                 .withTest(xml).ignoreWhitespace().build();
 
         assertThat(documentDiff.hasDifferences())
@@ -128,7 +128,6 @@ public class CreateMavenSettingsTaskTest {
 
         // VERIFY
         assertThat(testee).isNotNull();
-        assertThat(testee.getId()).isEqualTo("x");
         assertThat(testee.getTemplate()).isEqualTo("~/.m2/settings.xml");
         assertThat(testee.getName()).isNull();
         assertThat(testee.getPassword()).isNull();

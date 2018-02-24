@@ -72,14 +72,14 @@ public class CreateGitConfigController
     @Override
     public void init(final SetupTask task) {
         if (!(task instanceof CreateGitConfigTask)) {
-            throw new IllegalArgumentException(
-                    "Expected task of type " + CreateGitConfigTask.class.getName()
-                            + ", but was: " + task.getClass().getName());
+            throw new IllegalArgumentException("Expected task of type "
+                    + CreateGitConfigTask.class.getName() + ", but was: "
+                    + task.getClass().getName());
         }
         this.task = (CreateGitConfigTask) task;
         refreshStatus();
     }
-    
+
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
         for (final PushDefault value : PushDefault.values()) {
@@ -97,7 +97,7 @@ public class CreateGitConfigController
 
             // Execute bean validation using a new task instance
             final String selected = pushDefault.getValue().toUpperCase();
-            final CreateGitConfigTask t = new CreateGitConfigTask("x",
+            final CreateGitConfigTask t = new CreateGitConfigTask(
                     name.textProperty().get(), email.textProperty().get(),
                     PushDefault.valueOf(selected));
             final Set<ConstraintViolation<CreateGitConfigTask>> violations = validator

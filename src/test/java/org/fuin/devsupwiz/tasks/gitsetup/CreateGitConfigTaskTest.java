@@ -48,7 +48,7 @@ public class CreateGitConfigTaskTest {
                         .getName().replace('.', '/') + "/test-gitconfig", utf8);
         final File file = new File("target/.test-gitconfig");
         file.delete();
-        final CreateGitConfigTask testee = new CreateGitConfigTask("x",
+        final CreateGitConfigTask testee = new CreateGitConfigTask(
                 "Peter Parker", "peter.parker@somewhere.com",
                 PushDefault.SIMPLE, file);
 
@@ -89,7 +89,7 @@ public class CreateGitConfigTaskTest {
         // PREPARE
         final File file = new File("target/.test-gitconfig");
         file.delete();
-        final CreateGitConfigTask testee = new CreateGitConfigTask("x",
+        final CreateGitConfigTask testee = new CreateGitConfigTask(
                 "Peter Parker", "peter.parker@somewhere.com",
                 PushDefault.SIMPLE, file);
 
@@ -98,7 +98,8 @@ public class CreateGitConfigTaskTest {
 
         // VERIFY
         final Diff documentDiff = DiffBuilder
-                .compare(JaxbUtils.XML_PREFIX + "<create-git-config id=\"x\" />")
+                .compare(
+                        JaxbUtils.XML_PREFIX + "<create-git-config />")
                 .withTest(xml).ignoreWhitespace().build();
 
         assertThat(documentDiff.hasDifferences())
@@ -118,7 +119,6 @@ public class CreateGitConfigTaskTest {
 
         // VERIFY
         assertThat(testee).isNotNull();
-        assertThat(testee.getId()).isEqualTo("x");
         assertThat(testee.getEmail()).isNull();
         assertThat(testee.getName()).isNull();
         assertThat(testee.getPushDefault()).isNull();

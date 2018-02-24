@@ -27,7 +27,6 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -41,6 +40,7 @@ import org.slf4j.MDC;
 
 /**
  * Creates and populates the "~/.gitconfig" file.
+ * Only one instance of this type is allowed 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = CreateGitConfigTask.KEY)
@@ -51,10 +51,6 @@ public class CreateGitConfigTask implements SetupTask {
 
     private static final Logger LOG = LoggerFactory
             .getLogger(CreateGitConfigTask.class);
-
-    @NotEmpty
-    @XmlAttribute(name = "id")
-    private String id;
 
     @NotEmpty(message = "{create-git-config.name.empty}")
     @XmlTransient
@@ -83,8 +79,6 @@ public class CreateGitConfigTask implements SetupTask {
     /**
      * Constructor for tests.
      * 
-     * @param id
-     *            Unique task identifier.
      * @param name
      *            User's name.
      * @param email
@@ -92,18 +86,16 @@ public class CreateGitConfigTask implements SetupTask {
      * @param pushDefault
      *            Default setting for push.
      */
-    public CreateGitConfigTask(@NotEmpty final String id,
-            @NotEmpty final String name, @NotEmpty final String email,
+    public CreateGitConfigTask(@NotEmpty final String name,
+            @NotEmpty final String email,
             @NotNull final PushDefault pushDefault) {
-        this(id, name, email, pushDefault,
+        this(name, email, pushDefault,
                 new File(Utils4J.getUserHomeDir(), ".gitconfig"));
     }
 
     /**
      * Constructor for tests.
      * 
-     * @param id
-     *            Unique task identifier.
      * @param name
      *            User's name.
      * @param email
@@ -113,12 +105,11 @@ public class CreateGitConfigTask implements SetupTask {
      * @param configFile
      *            File to create.
      */
-    public CreateGitConfigTask(@NotEmpty final String id,
-            @NotEmpty final String name, @NotEmpty final String email,
+    public CreateGitConfigTask(@NotEmpty final String name,
+            @NotEmpty final String email,
             @NotNull final PushDefault pushDefault,
             @NotNull final File configFile) {
         super();
-        this.id = id;
         this.name = name;
         this.email = email;
         this.pushDefault = pushDefault;
@@ -191,7 +182,7 @@ public class CreateGitConfigTask implements SetupTask {
     @Override
     public void execute() {
 
-        MDC.put(MDC_TASK_KEY, getTypeId());
+        MDC.put(MDC_TASK_KEY, getType());
         try {
 
             if (!alreadyExecuted()) {
@@ -221,18 +212,13 @@ public class CreateGitConfigTask implements SetupTask {
 
     @Override
     public String getResource() {
-        return this.getClass().getPackage().getName().replace('.', '/')
-                + "/" + KEY;
+        return this.getClass().getPackage().getName().replace('.', '/') + "/"
+                + KEY;
     }
 
     @Override
     public String getFxml() {
         return "/" + getResource() + ".fxml";
-    }
-
-    @Override
-    public String getId() {
-        return id;
     }
 
     @Override
@@ -242,7 +228,7 @@ public class CreateGitConfigTask implements SetupTask {
 
     @Override
     public String getTypeId() {
-        return getType() + "[" + getId() +"]";
+        return KEY;
     }
-    
+
 }
