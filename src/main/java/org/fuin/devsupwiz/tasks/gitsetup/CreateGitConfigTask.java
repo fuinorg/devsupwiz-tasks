@@ -31,7 +31,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.commons.io.FileUtils;
-import org.fuin.devsupwiz.common.SetupTask;
+import org.fuin.devsupwiz.common.AbstractSetupTask;
 import org.fuin.devsupwiz.common.ValidateInstance;
 import org.fuin.utils4j.Utils4J;
 import org.slf4j.Logger;
@@ -44,7 +44,7 @@ import org.slf4j.MDC;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = CreateGitConfigTask.KEY)
-public class CreateGitConfigTask implements SetupTask {
+public class CreateGitConfigTask extends AbstractSetupTask {
 
     /** Unique normalized name of the task (for example used for FXML file). */
     static final String KEY = "create-git-config";

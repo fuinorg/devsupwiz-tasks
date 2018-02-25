@@ -30,8 +30,8 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
+import org.fuin.devsupwiz.common.AbstractSetupTask;
 import org.fuin.devsupwiz.common.LogOutputStream;
-import org.fuin.devsupwiz.common.SetupTask;
 import org.fuin.devsupwiz.common.ShellCommandExecutor;
 import org.fuin.devsupwiz.common.ValidateInstance;
 import org.slf4j.Logger;
@@ -44,7 +44,7 @@ import org.slf4j.event.Level;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = SetHostnameTask.KEY)
-public class SetHostnameTask implements SetupTask {
+public class SetHostnameTask extends AbstractSetupTask {
 
     /** Unique normalized name of the task (for example used for FXML file). */
     static final String KEY = "set-hostname";

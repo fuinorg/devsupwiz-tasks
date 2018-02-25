@@ -35,8 +35,8 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.fuin.devsupwiz.common.AbstractSetupTask;
 import org.fuin.devsupwiz.common.DevSupWizUtils;
-import org.fuin.devsupwiz.common.SetupTask;
 import org.fuin.devsupwiz.common.ValidateInstance;
 import org.fuin.utils4j.Utils4J;
 import org.slf4j.Logger;
@@ -48,7 +48,7 @@ import org.slf4j.MDC;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = CreateMavenSettingsTask.KEY)
-public class CreateMavenSettingsTask implements SetupTask {
+public class CreateMavenSettingsTask extends AbstractSetupTask {
 
     private static final String M2_SETTINGS_XML = ".m2/settings.xml";
 

@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.fuin.devsupwiz.common.SetupTask;
+import org.fuin.devsupwiz.common.AbstractSetupTask;
 import org.fuin.devsupwiz.common.ValidateInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +40,7 @@ import org.slf4j.MDC;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = SetPersonalDataTask.KEY)
-public class SetPersonalDataTask implements SetupTask {
+public class SetPersonalDataTask extends AbstractSetupTask {
 
     /** Unique normalized name of the task (for example used for FXML file). */
     static final String KEY = "set-personal-data";

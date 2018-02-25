@@ -31,8 +31,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.fuin.utils4j.JaxbUtils;
 import org.fuin.utils4j.PropertiesFilePreferencesFactory;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.diff.Diff;
 
@@ -41,21 +44,54 @@ import org.xmlunit.diff.Diff;
  */
 public class SetupGitSshTaskTest {
 
+    private static final String PREFERENCES_FACTORY = "java.util.prefs.PreferencesFactory";
+
+    private static final Logger LOG = LoggerFactory
+            .getLogger(SetupGitSshTaskTest.class);
+
     private File sshDir;
+
+    private String originalUserPrefDir;
+
+    private String originalPreferencesFactory;
 
     @Before
     public void setup() {
         sshDir = new File("target/.ssh");
-        FileUtils.deleteQuietly(sshDir);
+        if (sshDir.exists()) {
+            assertThat(FileUtils.deleteQuietly(sshDir));
+        }
         final File userPrefDir = new File("target/.dev-setup");
-        FileUtils.deleteQuietly(userPrefDir);
+        if (userPrefDir.exists()) {
+            assertThat(FileUtils.deleteQuietly(userPrefDir)).isTrue();
+        }
+        assertThat(userPrefDir.mkdir()).isTrue();
 
-        userPrefDir.mkdir();
+        originalUserPrefDir = System
+                .getProperty(PropertiesFilePreferencesFactory.USER_PREF_DIR);
+        originalPreferencesFactory = System.getProperty(PREFERENCES_FACTORY);
+
         System.setProperty(PropertiesFilePreferencesFactory.USER_PREF_DIR,
                 userPrefDir.toString());
-        System.setProperty("java.util.prefs.PreferencesFactory",
+        System.setProperty(PREFERENCES_FACTORY,
                 PropertiesFilePreferencesFactory.class.getName());
 
+    }
+
+    @After
+    public void tearDown() {
+        if (originalUserPrefDir == null) {
+            System.clearProperty(
+                    PropertiesFilePreferencesFactory.USER_PREF_DIR);
+        } else {
+            System.setProperty(PropertiesFilePreferencesFactory.USER_PREF_DIR,
+                    originalUserPrefDir);
+        }
+        if (originalPreferencesFactory == null) {
+            System.clearProperty(PREFERENCES_FACTORY);
+        } else {
+            System.setProperty(PREFERENCES_FACTORY, originalPreferencesFactory);
+        }
     }
 
     @Test
@@ -77,7 +113,18 @@ public class SetupGitSshTaskTest {
         testee.execute();
 
         // VERIFY
-        assertThat(new File(sshDir, "config")).usingCharset(utf8)
+
+        LOG.error(sshDir + " exists: " + sshDir.exists());
+        File[] files = sshDir.listFiles();
+        if (files == null) {
+            LOG.error(sshDir + " has no files ");
+        } else {
+            for (File file : files) {
+                LOG.error(sshDir + ": " + file);
+            }
+        }
+
+        assertThat(testee.getConfigFile()).usingCharset(utf8)
                 .hasContent(expected);
 
     }
@@ -115,7 +162,6 @@ public class SetupGitSshTaskTest {
 
         // TEST
         final String xml = JaxbUtils.marshal(testee, SetupGitSshTask.class);
-        System.out.println(xml);
 
         // VERIFY
         final Diff documentDiff = DiffBuilder.compare(JaxbUtils.XML_PREFIX

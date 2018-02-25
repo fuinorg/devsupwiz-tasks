@@ -10,10 +10,18 @@ Common tasks for the JavaFX based wizard ([dev-setup-wizard](https://github.com/
 
 > :warning: Be aware that this is work in progress - The project has a very low test coverage at the moment :warning:
 
+## set-personal-data
+Sets personal data like name and email address.
+```xml
+<set-personal-data />
+```
+
+<a href="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/set-personal-data.png" target="_blank"><img src="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/set-personal-data.png" width="320" height="335" alt="Sets personal data screen"></a>
+
 ## set-hostname
 Sets a new hostname for the virtual machine (VM).
 ```xml
-<set-hostname task-class="org.fuin.devsupwiz.tasks.hostname.SetHostnameTask" />
+<set-hostname />
 ```
 
 <a href="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/set-hostname.png" target="_blank"><img src="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/set-hostname.png" width="320" height="335" alt="Set hostname screen"></a>
@@ -21,7 +29,7 @@ Sets a new hostname for the virtual machine (VM).
 # create-git-config
 Creates and populates the "~/.gitconfig" file.
 ```xml
-<create-git-config task-class="org.fuin.devsupwiz.tasks.gitsetup.CreateGitConfigTask" />
+<create-git-config />
 ```
 
 <a href="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/create-git-config.png" target="_blank"><img src="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/create-git-config.png" width="320" height="335" alt="Create git config screen"></a>
@@ -29,8 +37,7 @@ Creates and populates the "~/.gitconfig" file.
 # setup-git-ssh
 Generates a new key pair and adds it to the "~/.ssh/config" file. The public key is also submitted to the git provider (Bitbucket, Github) using a REST API.
 ```xml
-<setup-git-ssh id="1" provider="bitbucket" host="bitbucket.org" 
-           task-class="org.fuin.devsupwiz.tasks.gitsetup.SetupGitSshTask" />
+<setup-git-ssh id="1" provider="bitbucket" host="bitbucket.org" />
 ```
 
 <a href="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/setup-git-ssh.png" target="_blank"><img src="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/setup-git-ssh.png" width="320" height="335" alt="Setup git ssh"></a>
@@ -38,7 +45,7 @@ Generates a new key pair and adds it to the "~/.ssh/config" file. The public key
 # git-clone
 Clones one or more git repositories. Requires that a valid SSH key is installed (See "setup-git-ssh" task).
 ```xml
-<git-clone id="1" target-dir="~/git" task-class="org.fuin.devsupwiz.tasks.gitsetup.GitCloneTask" >
+<git-clone id="1" target-dir="~/git">
   <repository>git@bitbucket.org:my_account/my-project.git</repository>
   <repository>git@bitbucket.org:my_account/another-one.git</repository>
   <repository>git@bitbucket.org:my_account/whatever.git</repository>
@@ -51,8 +58,7 @@ Clones one or more git repositories. Requires that a valid SSH key is installed 
 # create-maven-settings
 Generates a new ".m2/settings.xml" file with a user name and password to allow access to a private Maven repository.
 ```xml
-<create-maven-settings id="1" template="~/git/my-project/config/settings.xml"
-    task-class="org.fuin.devsupwiz.tasks.maven.CreateMavenSettingsTask"/>
+<create-maven-settings id="1" template="~/git/my-project/config/settings.xml" />
 ```
 
 <a href="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/create-maven-settings.png" target="_blank"><img src="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/create-maven-settings.png" width="320" height="335" alt="Create Maven settings"></a>

@@ -38,9 +38,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.commons.io.FileUtils;
+import org.fuin.devsupwiz.common.AbstractSetupTask;
 import org.fuin.devsupwiz.common.DevSupWizUtils;
 import org.fuin.devsupwiz.common.MultipleInstancesSetupTask;
-import org.fuin.devsupwiz.common.SetupTask;
 import org.fuin.devsupwiz.common.ValidateInstance;
 import org.fuin.utils4j.Utils4J;
 import org.slf4j.Logger;
@@ -57,7 +57,7 @@ import com.mashape.unirest.http.exceptions.UnirestException;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = SetupGitSshTask.KEY)
-public class SetupGitSshTask implements MultipleInstancesSetupTask {
+public class SetupGitSshTask extends AbstractSetupTask implements MultipleInstancesSetupTask {
 
     /** Unique normalized name of the task (for example used for FXML file). */
     static final String KEY = "setup-git-ssh";
@@ -243,11 +243,7 @@ public class SetupGitSshTask implements MultipleInstancesSetupTask {
 
     @Override
     public boolean alreadyExecuted() {
-        return userPrefs.getBoolean(getPrefKey(), false);
-    }
-
-    private String getPrefKey() {
-        return getType() + "-" + getId();
+        return userPrefs.getBoolean(getTypeId(), false);
     }
 
     @ValidateInstance
@@ -282,11 +278,11 @@ public class SetupGitSshTask implements MultipleInstancesSetupTask {
                 }
 
                 try {
-                    userPrefs.putBoolean(getPrefKey(), true);
+                    userPrefs.putBoolean(getTypeId(), true);
                     userPrefs.flush();
                 } catch (final BackingStoreException ex) {
                     throw new RuntimeException("Failed to save the setup key '"
-                            + getPrefKey() + "'", ex);
+                            + getTypeId() + "'", ex);
                 }
                 LOG.info("Successfully finished SSH git setup");
 
@@ -328,7 +324,7 @@ public class SetupGitSshTask implements MultipleInstancesSetupTask {
         return name + "-" + host;
     }
 
-    private File getConfigFile() {
+    File getConfigFile() {
         return new File(sshDir, "config");
     }
 

@@ -37,6 +37,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.commons.lang3.StringUtils;
+import org.fuin.devsupwiz.common.AbstractSetupTask;
 import org.fuin.devsupwiz.common.LogOutputStream;
 import org.fuin.devsupwiz.common.MultipleInstancesSetupTask;
 import org.fuin.devsupwiz.common.ShellCommandExecutor;
@@ -53,7 +54,7 @@ import org.slf4j.event.Level;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = GitCloneTask.KEY)
-public class GitCloneTask implements MultipleInstancesSetupTask {
+public class GitCloneTask extends AbstractSetupTask implements MultipleInstancesSetupTask {
 
     /** Unique normalized name of the task (for example used for FXML file). */
     static final String KEY = "git-clone";
