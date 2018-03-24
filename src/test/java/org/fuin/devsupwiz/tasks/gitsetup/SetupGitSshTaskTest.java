@@ -43,7 +43,7 @@ import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.diff.Diff;
 
 /**
- * Test for the {@link SetupGitSshTask} class.
+ * Test for the {@link GenerateSshKeyTask} class.
  */
 public class SetupGitSshTaskTest {
 
@@ -72,12 +72,12 @@ public class SetupGitSshTaskTest {
         final Charset utf8 = Charset.forName("utf-8");
         final String expected = IOUtils
                 .resourceToString(
-                        "/" + SetupGitSshTask.class.getPackage().getName()
+                        "/" + GenerateSshKeyTask.class.getPackage().getName()
                                 .replace('.', '/') + "/test-setup-ssh-git",
                         utf8);
         final String user = "peter_parker";
         final String host = "bitbucket.org";
-        final SetupGitSshTask testee = new SetupGitSshTask("x", user, host,
+        final GenerateSshKeyTask testee = new GenerateSshKeyTask("x", user, host,
                 sshDir);
         final ConfigImpl config = new ConfigImpl("test", testee);
         config.init();
@@ -105,11 +105,11 @@ public class SetupGitSshTaskTest {
     @Test
     public void testValidateInstance() {
 
-        final SetupGitSshTask testee = new SetupGitSshTask();
+        final GenerateSshKeyTask testee = new GenerateSshKeyTask();
 
         final Validator validator = Validation.buildDefaultValidatorFactory()
                 .getValidator();
-        final Set<ConstraintViolation<SetupGitSshTask>> violations = validator
+        final Set<ConstraintViolation<GenerateSshKeyTask>> violations = validator
                 .validate(testee, Default.class, UserInput.class);
 
         assertThat(DevSupWizUtils.violated(violations, "name")).isTrue();
@@ -121,15 +121,15 @@ public class SetupGitSshTaskTest {
     public void testMarshal() {
 
         // PREPARE
-        final SetupGitSshTask testee = new SetupGitSshTask("x", "peter_parker",
+        final GenerateSshKeyTask testee = new GenerateSshKeyTask("x", "peter_parker",
                 "bitbucket.org", sshDir);
 
         // TEST
-        final String xml = JaxbUtils.marshal(testee, SetupGitSshTask.class);
+        final String xml = JaxbUtils.marshal(testee, GenerateSshKeyTask.class);
 
         // VERIFY
         final Diff documentDiff = DiffBuilder.compare(JaxbUtils.XML_PREFIX
-                + "<setup-git-ssh id=\"x\" name=\"peter_parker\" host=\"bitbucket.org\" />")
+                + "<generate-ssh-key id=\"x\" name=\"peter_parker\" host=\"bitbucket.org\" />")
                 .withTest(xml).ignoreWhitespace().build();
 
         assertThat(documentDiff.hasDifferences())
@@ -141,11 +141,11 @@ public class SetupGitSshTaskTest {
     public void testUnmarshal() {
 
         // PREPARE
-        final String xml = "<setup-git-ssh id=\"x\" />";
+        final String xml = "<generate-ssh-key id=\"x\" />";
 
         // TEST
-        final SetupGitSshTask testee = JaxbUtils.unmarshal(xml,
-                SetupGitSshTask.class);
+        final GenerateSshKeyTask testee = JaxbUtils.unmarshal(xml,
+                GenerateSshKeyTask.class);
 
         // VERIFY
         assertThat(testee).isNotNull();

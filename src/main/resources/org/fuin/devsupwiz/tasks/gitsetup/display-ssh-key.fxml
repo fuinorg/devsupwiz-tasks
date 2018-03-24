@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -9,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.fuin.devsupwiz.tasks.gitsetup.SetupGitSshController">
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.fuin.devsupwiz.tasks.gitsetup.DisplaySshKeyController">
    <children>
       <Label id="title" fx:id="title" text="%title">
          <font>
@@ -37,5 +38,7 @@
             <TextField id="host" fx:id="host" GridPane.columnIndex="2" GridPane.rowIndex="2" />
          </children>
       </GridPane>
+      <Label text="%key" />
+      <TextArea id="key" fx:id="key" prefHeight="200.0" prefWidth="200.0" wrapText="true" />
    </children>
 </VBox>

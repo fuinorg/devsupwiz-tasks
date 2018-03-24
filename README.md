@@ -34,16 +34,24 @@ Creates and populates the "~/.gitconfig" file.
 
 <a href="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/create-git-config.png" target="_blank"><img src="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/create-git-config.png" width="320" height="335" alt="Create git config screen"></a>
 
-# setup-git-ssh
-Generates a new key pair and adds it to the "~/.ssh/config" file. The public key is also submitted to the git provider (Bitbucket, Github) using a REST API.
+# generate-ssh-key
+Generates a new key pair and adds it to the "~/.ssh/config" file. 
 ```xml
-<setup-git-ssh id="1" provider="bitbucket" host="bitbucket.org" />
+<generate-ssh-key id="1" host="bitbucket.org" />
 ```
 
-<a href="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/setup-git-ssh.png" target="_blank"><img src="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/setup-git-ssh.png" width="320" height="335" alt="Setup git ssh"></a>
+<a href="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/generate-ssh-key.png" target="_blank"><img src="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/generate-ssh-key.png" width="320" height="335" alt="Create ssh keys"></a>
+
+# display-ssh-key
+Displays a newly generated public key. 
+```xml
+<display-ssh-key id="1" ref="generate-ssh-key[1]" />
+```
+
+<a href="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/display-ssh-key.png" target="_blank"><img src="https://github.com/fuinorg/devsupwiz-tasks/raw/master/doc/display-ssh-key.png" width="320" height="335" alt="Display ssh public key"></a>
 
 # git-clone
-Clones one or more git repositories. Requires that a valid SSH key is installed (See "setup-git-ssh" task).
+Clones one or more git repositories. Requires that a valid SSH key is created and installed in your repository (See "generate-ssh-key" task).
 ```xml
 <git-clone id="1" target-dir="~/git">
   <repository>git@bitbucket.org:my_account/my-project.git</repository>

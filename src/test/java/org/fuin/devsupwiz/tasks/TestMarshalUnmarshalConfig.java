@@ -31,7 +31,7 @@ import org.fuin.devsupwiz.common.ConfigImpl;
 import org.fuin.devsupwiz.tasks.gitsetup.CreateGitConfigTask;
 import org.fuin.devsupwiz.tasks.gitsetup.GitCloneTask;
 import org.fuin.devsupwiz.tasks.gitsetup.PushDefault;
-import org.fuin.devsupwiz.tasks.gitsetup.SetupGitSshTask;
+import org.fuin.devsupwiz.tasks.gitsetup.GenerateSshKeyTask;
 import org.fuin.devsupwiz.tasks.hostname.SetHostnameTask;
 import org.fuin.devsupwiz.tasks.maven.CreateMavenSettingsTask;
 import org.fuin.devsupwiz.tasks.personal.SetPersonalDataTask;
@@ -71,7 +71,7 @@ public class TestMarshalUnmarshalConfig {
         final String xml = JaxbUtils.marshal(testee, ConfigImpl.class,
                 CreateGitConfigTask.class, SetHostnameTask.class,
                 SetPersonalDataTask.class, GitCloneTask.class,
-                CreateMavenSettingsTask.class, SetupGitSshTask.class);
+                CreateMavenSettingsTask.class, GenerateSshKeyTask.class);
 
         // VERIFY
         final Diff documentDiff = DiffBuilder.compare(original).withTest(xml)
@@ -93,7 +93,7 @@ public class TestMarshalUnmarshalConfig {
                 "a", "b", PushDefault.SIMPLE);
         final CreateMavenSettingsTask createMavenSettingsTask = new CreateMavenSettingsTask(
                 "a", "b", "c");
-        final SetupGitSshTask setupGitSshTask = new SetupGitSshTask("1", "a",
+        final GenerateSshKeyTask setupGitSshTask = new GenerateSshKeyTask("1", "a",
                 "b");
         final GitCloneTask gitCloneTask = new GitCloneTask("1", "a",
                 new ArrayList<>());

@@ -43,10 +43,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
 /**
- * UI controller for ssh git setup.
+ * UI controller for ssh key pair generation.
  */
 @Loggable
-public class SetupGitSshController implements SetupController {
+public class GenerateSshKeyController implements SetupController {
 
     @FXML
     private TextField name;
@@ -60,16 +60,16 @@ public class SetupGitSshController implements SetupController {
     @Inject
     private Validator validator;
 
-    private SetupGitSshTask task;
+    private GenerateSshKeyTask task;
 
     @Override
     public void init(final SetupTask setupTask) {
-        if (!(setupTask instanceof SetupGitSshTask)) {
+        if (!(setupTask instanceof GenerateSshKeyTask)) {
             throw new IllegalArgumentException(
-                    "Expected task of type " + SetupGitSshTask.class.getName()
+                    "Expected task of type " + GenerateSshKeyTask.class.getName()
                             + ", but was: " + setupTask.getClass().getName());
         }
-        task = (SetupGitSshTask) setupTask;
+        task = (GenerateSshKeyTask) setupTask;
 
         host.setText(task.getHost());
 
@@ -84,11 +84,11 @@ public class SetupGitSshController implements SetupController {
         if (!task.alreadyExecuted()) {
 
             // Execute bean validation using a new task instance
-            final SetupGitSshTask t = new SetupGitSshTask("x", name.getText(),
+            final GenerateSshKeyTask t = new GenerateSshKeyTask("x", name.getText(),
                     host.getText());
-            final Set<ConstraintViolation<SetupGitSshTask>> violations = validator
+            final Set<ConstraintViolation<GenerateSshKeyTask>> violations = validator
                     .validate(t, UserInput.class);
-            for (final ConstraintViolation<SetupGitSshTask> violation : violations) {
+            for (final ConstraintViolation<GenerateSshKeyTask> violation : violations) {
                 errors.add(violation.getMessage());
             }
 

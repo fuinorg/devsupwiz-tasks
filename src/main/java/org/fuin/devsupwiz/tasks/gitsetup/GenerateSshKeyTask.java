@@ -46,31 +46,30 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 /**
- * Generates a key pair and adds it to the "~/.ssh/config" file. The public key
- * is also submitted to the git provider (Bitbucket, Github) using a REST API.
+ * Generates an SSH key pair and adds it to the "~/.ssh/config" file. 
  */
 @Vetoed
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = SetupGitSshTask.KEY)
-public final class SetupGitSshTask extends AbstractSetupTask
+@XmlRootElement(name = GenerateSshKeyTask.KEY)
+public final class GenerateSshKeyTask extends AbstractSetupTask
         implements MultipleInstancesSetupTask {
 
     /** Unique normalized name of the task (for example used for FXML file). */
-    static final String KEY = "setup-git-ssh";
+    static final String KEY = "generate-ssh-key";
 
     private static final Logger LOG = LoggerFactory
-            .getLogger(SetupGitSshTask.class);
+            .getLogger(GenerateSshKeyTask.class);
 
     @NotEmpty
     @XmlAttribute(name = "id")
     private String id;
 
-    @NotEmpty(message = "{setup-git-ssh.name.empty}", groups = {
+    @NotEmpty(message = "{generate-ssh-key.name.empty}", groups = {
             UserInput.class })
     @XmlAttribute(name = "name")
     private String name;
 
-    @NotEmpty(message = "{setup-git-ssh.host.empty}", groups = {
+    @NotEmpty(message = "{generate-ssh-key.host.empty}", groups = {
             UserInput.class })
     @XmlAttribute(name = "host")
     private String host;
@@ -84,7 +83,7 @@ public final class SetupGitSshTask extends AbstractSetupTask
     /**
      * Default constructor for JAXB.
      */
-    protected SetupGitSshTask() {
+    protected GenerateSshKeyTask() {
         super();
         sshDir = getDefaultSshDir();
     }
@@ -99,7 +98,7 @@ public final class SetupGitSshTask extends AbstractSetupTask
      * @param host
      *            Host name (Domain without "www").
      */
-    public SetupGitSshTask(@NotEmpty final String id,
+    public GenerateSshKeyTask(@NotEmpty final String id,
             @NotEmpty final String name, @NotEmpty final String host) {
         this(id, name, host, getDefaultSshDir());
     }
@@ -116,7 +115,7 @@ public final class SetupGitSshTask extends AbstractSetupTask
      * @param sshDir
      *            SSH directory.
      */
-    SetupGitSshTask(@NotEmpty final String id, @NotEmpty final String name,
+    GenerateSshKeyTask(@NotEmpty final String id, @NotEmpty final String name,
             @NotEmpty final String host, @NotNull final File sshDir) {
         super();
         this.id = id;
