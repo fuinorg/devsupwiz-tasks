@@ -66,18 +66,6 @@ public class DisplaySshKeyController implements Initializable, SetupController {
     public void initialize(final URL location, final ResourceBundle resources) {
         this.bundle = resources;
         title.setText(getString(bundle, "title", config.getName()));
-
-        final GenerateSshKeyTask keyGenTask = config
-                .findTask(task.getTaskRef());
-        if (keyGenTask == null) {
-            throw new IllegalStateException(
-                    "Wasn't able to find task: '" + task.getTaskRef() + "'");
-        } else {
-            name.setText(keyGenTask.getName());
-            host.setText(keyGenTask.getHost());
-            key.setText(keyGenTask.getPublicKey());
-        }
-
     }
 
     @Override
@@ -88,6 +76,19 @@ public class DisplaySshKeyController implements Initializable, SetupController {
                             + ", but was: " + task.getClass().getName());
         }
         this.task = (DisplaySshKeyTask) task;
+        
+        final GenerateSshKeyTask keyGenTask = config
+                .findTask(this.task.getTaskRef());
+        if (keyGenTask == null) {
+            throw new IllegalStateException(
+                    "Wasn't able to find task: '" + this.task.getTaskRef() + "'");
+        } else {
+            name.setText(keyGenTask.getName());
+            host.setText(keyGenTask.getHost());
+            key.setText(keyGenTask.getPublicKey());
+        }
+
+        
         refreshStatus();
     }
 

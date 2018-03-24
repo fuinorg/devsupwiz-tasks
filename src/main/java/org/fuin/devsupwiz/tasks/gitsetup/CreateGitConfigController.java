@@ -40,6 +40,8 @@ import org.fuin.devsupwiz.common.SetupController;
 import org.fuin.devsupwiz.common.SetupTask;
 import org.fuin.devsupwiz.common.UserInput;
 import org.fuin.devsupwiz.tasks.personal.SetPersonalDataTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -55,6 +57,8 @@ import javafx.scene.control.TextField;
 public class CreateGitConfigController
         implements Initializable, SetupController {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CreateGitConfigController.class);
+    
     @FXML
     private TextField name;
 
@@ -83,23 +87,26 @@ public class CreateGitConfigController
                     + task.getClass().getName());
         }
         this.task = (CreateGitConfigTask) task;
+        
+        if (!task.alreadyExecuted()) {
+            final SetPersonalDataTask pdTask = config.findTask(SetPersonalDataTask.KEY);
+            if (pdTask == null) {
+                LOG.warn("Referenced task not found: {}", SetPersonalDataTask.KEY);
+            } else {
+                LOG.debug("Referenced task: {}", SetPersonalDataTask.KEY);
+                name.setText(pdTask.getFullName());
+            }
+        }
+        
         refreshStatus();
     }
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
-        
-        if (!task.alreadyExecuted()) {
-            final SetPersonalDataTask pdTask = config.findTask(SetPersonalDataTask.KEY);
-            if (pdTask != null) {
-                name.setText(pdTask.getFullName());
-            }
-        }
-        
         for (final PushDefault value : PushDefault.values()) {
             pushDefault.getItems().add(value.name().toLowerCase());
         }
-        pushDefault.setValue(task.getPushDefault().name().toLowerCase());
+        pushDefault.setValue(PushDefault.SIMPLE.name().toLowerCase());
     }
 
     @Override
