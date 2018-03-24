@@ -34,6 +34,7 @@ import org.controlsfx.control.decoration.GraphicDecoration;
 import org.fuin.devsupwiz.common.Loggable;
 import org.fuin.devsupwiz.common.SetupController;
 import org.fuin.devsupwiz.common.SetupTask;
+import org.fuin.devsupwiz.common.UserInput;
 
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
@@ -88,7 +89,7 @@ public class SetPersonalDataController implements SetupController {
             final SetPersonalDataTask t = new SetPersonalDataTask(
                     firstName.getText(), lastName.getText(), email.getText());
             final Set<ConstraintViolation<SetPersonalDataTask>> violations = validator
-                    .validate(t);
+                    .validate(t, UserInput.class);
             for (final ConstraintViolation<SetPersonalDataTask> violation : violations) {
                 errors.add(violation.getMessage());
             }

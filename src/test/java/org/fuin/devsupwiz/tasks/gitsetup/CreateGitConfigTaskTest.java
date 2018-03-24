@@ -18,16 +18,21 @@
 package org.fuin.devsupwiz.tasks.gitsetup;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Set;
 
-import javax.enterprise.inject.se.SeContainer;
-import javax.enterprise.inject.se.SeContainerInitializer;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.groups.Default;
 
 import org.apache.commons.io.IOUtils;
+import org.fuin.devsupwiz.common.ConfigImpl;
+import org.fuin.devsupwiz.common.DevSupWizUtils;
+import org.fuin.devsupwiz.common.UserInput;
 import org.fuin.utils4j.JaxbUtils;
 import org.junit.Test;
 import org.xmlunit.builder.DiffBuilder;
@@ -51,6 +56,8 @@ public class CreateGitConfigTaskTest {
         final CreateGitConfigTask testee = new CreateGitConfigTask(
                 "Peter Parker", "peter.parker@somewhere.com",
                 PushDefault.SIMPLE, file);
+        final ConfigImpl config = new ConfigImpl("test", testee);
+        config.init();
 
         // TEST
         testee.execute();
@@ -61,25 +68,17 @@ public class CreateGitConfigTaskTest {
     }
 
     @Test
-    public void testExecuteValidateInstance() {
+    public void testValidateInstance() {
 
-        try (final SeContainer container = SeContainerInitializer.newInstance()
-                .initialize()) {
-            final CreateGitConfigTask testee = container
-                    .select(CreateGitConfigTask.class).get();
-            try {
-                testee.execute();
-                fail();
-            } catch (final IllegalStateException ex) {
-                assertThat(ex.getMessage()).startsWith("The instance of type '"
-                        + CreateGitConfigTask.class.getName() + "' "
-                        + "was invalid when calling method");
-                assertThat(ex.getMessage())
-                        .contains("Push Default is required");
-                assertThat(ex.getMessage()).contains("EMail is required");
-                assertThat(ex.getMessage()).contains("Name is required");
-            }
-        }
+        final CreateGitConfigTask testee = new CreateGitConfigTask();
+
+        final Validator validator = Validation.buildDefaultValidatorFactory()
+                .getValidator();
+        final Set<ConstraintViolation<CreateGitConfigTask>> violations = validator
+                .validate(testee, Default.class, UserInput.class);
+
+        assertThat(DevSupWizUtils.violated(violations, "email")).isTrue();
+        assertThat(DevSupWizUtils.violated(violations, "name")).isTrue();
 
     }
 
@@ -92,14 +91,15 @@ public class CreateGitConfigTaskTest {
         final CreateGitConfigTask testee = new CreateGitConfigTask(
                 "Peter Parker", "peter.parker@somewhere.com",
                 PushDefault.SIMPLE, file);
+        final ConfigImpl config = new ConfigImpl("test", testee);
+        config.init();
 
         // TEST
         final String xml = JaxbUtils.marshal(testee, CreateGitConfigTask.class);
 
         // VERIFY
-        final Diff documentDiff = DiffBuilder
-                .compare(
-                        JaxbUtils.XML_PREFIX + "<create-git-config />")
+        final Diff documentDiff = DiffBuilder.compare(JaxbUtils.XML_PREFIX
+                + "<create-git-config name=\"Peter Parker\" email=\"peter.parker@somewhere.com\" push-default=\"SIMPLE\"/>")
                 .withTest(xml).ignoreWhitespace().build();
 
         assertThat(documentDiff.hasDifferences())
@@ -116,12 +116,14 @@ public class CreateGitConfigTaskTest {
         // TEST
         final CreateGitConfigTask testee = JaxbUtils.unmarshal(xml,
                 CreateGitConfigTask.class);
+        final ConfigImpl config = new ConfigImpl("test", testee);
+        config.init();
 
         // VERIFY
         assertThat(testee).isNotNull();
         assertThat(testee.getEmail()).isNull();
         assertThat(testee.getName()).isNull();
-        assertThat(testee.getPushDefault()).isNull();
+        assertThat(testee.getPushDefault()).isEqualTo(PushDefault.SIMPLE);
         assertThat(testee.getResource()).isNotEmpty();
         assertThat(testee.getFxml()).isNotEmpty();
 

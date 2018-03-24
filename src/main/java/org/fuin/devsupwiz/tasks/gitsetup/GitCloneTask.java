@@ -24,9 +24,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
 
+import javax.enterprise.inject.Vetoed;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -34,14 +33,12 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.commons.lang3.StringUtils;
 import org.fuin.devsupwiz.common.AbstractSetupTask;
 import org.fuin.devsupwiz.common.LogOutputStream;
 import org.fuin.devsupwiz.common.MultipleInstancesSetupTask;
 import org.fuin.devsupwiz.common.ShellCommandExecutor;
-import org.fuin.devsupwiz.common.ValidateInstance;
 import org.fuin.utils4j.Utils4J;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,9 +49,11 @@ import org.slf4j.event.Level;
  * Clones one or more git repositories. Requires that a valid SSH key is
  * installed.
  */
+@Vetoed
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = GitCloneTask.KEY)
-public class GitCloneTask extends AbstractSetupTask implements MultipleInstancesSetupTask {
+public final class GitCloneTask extends AbstractSetupTask
+        implements MultipleInstancesSetupTask {
 
     /** Unique normalized name of the task (for example used for FXML file). */
     static final String KEY = "git-clone";
@@ -73,15 +72,11 @@ public class GitCloneTask extends AbstractSetupTask implements MultipleInstances
     @XmlElement(name = "repository")
     private List<String> repositories;
 
-    @XmlTransient
-    private Preferences userPrefs;
-
     /**
      * Default constructor for JAXB.
      */
     protected GitCloneTask() {
         super();
-        userPrefs = Preferences.userRoot();
     }
 
     /**
@@ -101,7 +96,6 @@ public class GitCloneTask extends AbstractSetupTask implements MultipleInstances
         this.id = id;
         this.targetDir = targetDir;
         this.repositories = new ArrayList<>(repositories);
-        this.userPrefs = Preferences.userRoot();
     }
 
     /**
@@ -109,7 +103,7 @@ public class GitCloneTask extends AbstractSetupTask implements MultipleInstances
      * 
      * @return Target directory.
      */
-    public String getTargetDir() {
+    public final String getTargetDir() {
         return targetDir;
     }
 
@@ -118,7 +112,7 @@ public class GitCloneTask extends AbstractSetupTask implements MultipleInstances
      * 
      * @return Target directory file.
      */
-    public File getTargetDirFile() {
+    public final File getTargetDirFile() {
         if (targetDir == null) {
             return new File(Utils4J.getUserHomeDir(), "git");
         }
@@ -133,7 +127,7 @@ public class GitCloneTask extends AbstractSetupTask implements MultipleInstances
      * @param targetDir
      *            Target directory.
      */
-    public void setTargetDir(@NotEmpty final String targetDir) {
+    public final void setTargetDir(@NotEmpty final String targetDir) {
         this.targetDir = targetDir;
     }
 
@@ -150,17 +144,7 @@ public class GitCloneTask extends AbstractSetupTask implements MultipleInstances
     }
 
     @Override
-    public boolean alreadyExecuted() {
-        return userPrefs.getBoolean(getPrefKey(), false);
-    }
-
-    private String getPrefKey() {
-        return getType() + "-" + getId();
-    }
-
-    @ValidateInstance
-    @Override
-    public void execute() {
+    public final void execute() {
 
         MDC.put(MDC_TASK_KEY, getTypeId());
         try {
@@ -188,13 +172,7 @@ public class GitCloneTask extends AbstractSetupTask implements MultipleInstances
 
                 }
 
-                try {
-                    userPrefs.putBoolean(getPrefKey(), true);
-                    userPrefs.flush();
-                } catch (final BackingStoreException ex) {
-                    throw new RuntimeException("Failed to save the setup key '"
-                            + getPrefKey() + "'", ex);
-                }
+                success();
                 LOG.info("Successfully finished SSH git setup");
 
             }
@@ -206,28 +184,28 @@ public class GitCloneTask extends AbstractSetupTask implements MultipleInstances
     }
 
     @Override
-    public String getResource() {
+    public final String getResource() {
         return this.getClass().getPackage().getName().replace('.', '/') + "/"
                 + KEY;
     }
 
     @Override
-    public String getFxml() {
+    public final String getFxml() {
         return "/" + getResource() + ".fxml";
     }
 
     @Override
-    public String getId() {
+    public final String getId() {
         return id;
     }
 
     @Override
-    public String getType() {
+    public final String getType() {
         return KEY;
     }
 
     @Override
-    public String getTypeId() {
+    public final String getTypeId() {
         return getType() + "[" + getId() + "]";
     }
 

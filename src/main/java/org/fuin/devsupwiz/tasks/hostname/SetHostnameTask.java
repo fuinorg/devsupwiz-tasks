@@ -20,20 +20,19 @@ package org.fuin.devsupwiz.tasks.hostname;
 import static org.fuin.devsupwiz.common.DevSupWizUtils.MDC_TASK_KEY;
 
 import java.util.HashMap;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
 
+import javax.enterprise.inject.Vetoed;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import org.fuin.devsupwiz.common.AbstractSetupTask;
 import org.fuin.devsupwiz.common.LogOutputStream;
 import org.fuin.devsupwiz.common.ShellCommandExecutor;
-import org.fuin.devsupwiz.common.ValidateInstance;
+import org.fuin.devsupwiz.common.UserInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -42,9 +41,10 @@ import org.slf4j.event.Level;
 /**
  * Sets the hostname for the system.
  */
+@Vetoed
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = SetHostnameTask.KEY)
-public class SetHostnameTask extends AbstractSetupTask {
+public final class SetHostnameTask extends AbstractSetupTask {
 
     /** Unique normalized name of the task (for example used for FXML file). */
     static final String KEY = "set-hostname";
@@ -52,12 +52,9 @@ public class SetHostnameTask extends AbstractSetupTask {
     private static final Logger LOG = LoggerFactory
             .getLogger(SetHostnameTask.class);
 
-    @XmlTransient
-    private Preferences userPrefs;
-
+    @XmlAttribute(name = "name")
     @Pattern(regexp = "[a-z][a-z0-9\\-]*", message = "{set-hostname.pattern}")
-    @NotEmpty(message = "{set-hostname.empty}")
-    @XmlTransient
+    @NotEmpty(message = "{set-hostname.empty}", groups = { UserInput.class })
     private String name;
 
     /**
@@ -65,7 +62,6 @@ public class SetHostnameTask extends AbstractSetupTask {
      */
     protected SetHostnameTask() {
         super();
-        userPrefs = Preferences.userRoot();
     }
 
     /**
@@ -76,7 +72,6 @@ public class SetHostnameTask extends AbstractSetupTask {
      */
     public SetHostnameTask(@NotEmpty final String name) {
         super();
-        userPrefs = Preferences.userRoot();
         this.name = name;
     }
 
@@ -85,7 +80,7 @@ public class SetHostnameTask extends AbstractSetupTask {
      * 
      * @return Host name.
      */
-    public String getName() {
+    public final String getName() {
         return name;
     }
 
@@ -95,18 +90,12 @@ public class SetHostnameTask extends AbstractSetupTask {
      * @param name
      *            Host name.
      */
-    public void setName(@NotEmpty final String name) {
+    public final void setName(@NotEmpty final String name) {
         this.name = name;
     }
 
     @Override
-    public boolean alreadyExecuted() {
-        return userPrefs.getBoolean(KEY, false);
-    }
-
-    @ValidateInstance
-    @Override
-    public void execute() {
+    public final void execute() {
 
         MDC.put(MDC_TASK_KEY, getType());
         try {
@@ -121,15 +110,12 @@ public class SetHostnameTask extends AbstractSetupTask {
 
                 final int result = executor.execute();
                 if (result == 0) {
-                    try {
-                        userPrefs.putBoolean(KEY, true);
-                        userPrefs.flush();
-                    } catch (final BackingStoreException ex) {
-                        throw new RuntimeException(
-                                "Failed to save the setup key '" + KEY + "'",
-                                ex);
-                    }
+                    success();
                     LOG.info("Successfully set the host name to '{}'", name);
+                } else {
+                    LOG.error(
+                            "Error # {} while trying to set the host name to '{}'",
+                            result, name);
                 }
 
             }
@@ -141,24 +127,24 @@ public class SetHostnameTask extends AbstractSetupTask {
     }
 
     @Override
-    public String getResource() {
+    public final String getResource() {
         return this.getClass().getPackage().getName().replace('.', '/') + "/"
                 + KEY;
     }
 
     @Override
-    public String getFxml() {
+    public final String getFxml() {
         return "/" + getResource() + ".fxml";
     }
 
     @Override
-    public String getType() {
+    public final String getType() {
         return KEY;
     }
 
     @Override
-    public String getTypeId() {
+    public final String getTypeId() {
         return KEY;
     }
-    
+
 }

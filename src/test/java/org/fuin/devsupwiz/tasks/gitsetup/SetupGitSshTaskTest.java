@@ -18,20 +18,23 @@
 package org.fuin.devsupwiz.tasks.gitsetup;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Set;
 
-import javax.enterprise.inject.se.SeContainer;
-import javax.enterprise.inject.se.SeContainerInitializer;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.groups.Default;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.fuin.devsupwiz.common.ConfigImpl;
+import org.fuin.devsupwiz.common.DevSupWizUtils;
+import org.fuin.devsupwiz.common.UserInput;
 import org.fuin.utils4j.JaxbUtils;
-import org.fuin.utils4j.PropertiesFilePreferencesFactory;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -44,16 +47,10 @@ import org.xmlunit.diff.Diff;
  */
 public class SetupGitSshTaskTest {
 
-    private static final String PREFERENCES_FACTORY = "java.util.prefs.PreferencesFactory";
-
     private static final Logger LOG = LoggerFactory
             .getLogger(SetupGitSshTaskTest.class);
 
     private File sshDir;
-
-    private String originalUserPrefDir;
-
-    private String originalPreferencesFactory;
 
     @Before
     public void setup() {
@@ -66,32 +63,6 @@ public class SetupGitSshTaskTest {
             assertThat(FileUtils.deleteQuietly(userPrefDir)).isTrue();
         }
         assertThat(userPrefDir.mkdir()).isTrue();
-
-        originalUserPrefDir = System
-                .getProperty(PropertiesFilePreferencesFactory.USER_PREF_DIR);
-        originalPreferencesFactory = System.getProperty(PREFERENCES_FACTORY);
-
-        System.setProperty(PropertiesFilePreferencesFactory.USER_PREF_DIR,
-                userPrefDir.toString());
-        System.setProperty(PREFERENCES_FACTORY,
-                PropertiesFilePreferencesFactory.class.getName());
-
-    }
-
-    @After
-    public void tearDown() {
-        if (originalUserPrefDir == null) {
-            System.clearProperty(
-                    PropertiesFilePreferencesFactory.USER_PREF_DIR);
-        } else {
-            System.setProperty(PropertiesFilePreferencesFactory.USER_PREF_DIR,
-                    originalUserPrefDir);
-        }
-        if (originalPreferencesFactory == null) {
-            System.clearProperty(PREFERENCES_FACTORY);
-        } else {
-            System.setProperty(PREFERENCES_FACTORY, originalPreferencesFactory);
-        }
     }
 
     @Test
@@ -106,8 +77,10 @@ public class SetupGitSshTaskTest {
                         utf8);
         final String user = "peter_parker";
         final String host = "bitbucket.org";
-        final SetupGitSshTask testee = new SetupGitSshTask("x", user, "secret",
-                GitProvider.BITBUCKET, host, sshDir, false);
+        final SetupGitSshTask testee = new SetupGitSshTask("x", user, host,
+                sshDir);
+        final ConfigImpl config = new ConfigImpl("test", testee);
+        config.init();
 
         // TEST
         testee.execute();
@@ -130,25 +103,17 @@ public class SetupGitSshTaskTest {
     }
 
     @Test
-    public void testExecuteValidateInstance() {
+    public void testValidateInstance() {
 
-        try (final SeContainer container = SeContainerInitializer.newInstance()
-                .initialize()) {
-            final SetupGitSshTask testee = container
-                    .select(SetupGitSshTask.class).get();
-            try {
-                testee.execute();
-                fail();
-            } catch (final IllegalStateException ex) {
-                assertThat(ex.getMessage()).startsWith("The instance of type '"
-                        + SetupGitSshTask.class.getName() + "' "
-                        + "was invalid when calling method");
-                assertThat(ex.getMessage()).contains("Provider is required");
-                assertThat(ex.getMessage()).contains("Password is required");
-                assertThat(ex.getMessage()).contains("Username is required");
-                assertThat(ex.getMessage()).contains("Host is required");
-            }
-        }
+        final SetupGitSshTask testee = new SetupGitSshTask();
+
+        final Validator validator = Validation.buildDefaultValidatorFactory()
+                .getValidator();
+        final Set<ConstraintViolation<SetupGitSshTask>> violations = validator
+                .validate(testee, Default.class, UserInput.class);
+
+        assertThat(DevSupWizUtils.violated(violations, "name")).isTrue();
+        assertThat(DevSupWizUtils.violated(violations, "host")).isTrue();
 
     }
 
@@ -157,15 +122,14 @@ public class SetupGitSshTaskTest {
 
         // PREPARE
         final SetupGitSshTask testee = new SetupGitSshTask("x", "peter_parker",
-                "secret", GitProvider.BITBUCKET, "bitbucket.org", sshDir,
-                false);
+                "bitbucket.org", sshDir);
 
         // TEST
         final String xml = JaxbUtils.marshal(testee, SetupGitSshTask.class);
 
         // VERIFY
         final Diff documentDiff = DiffBuilder.compare(JaxbUtils.XML_PREFIX
-                + "<setup-git-ssh id=\"x\" provider=\"bitbucket\" host=\"bitbucket.org\" />")
+                + "<setup-git-ssh id=\"x\" name=\"peter_parker\" host=\"bitbucket.org\" />")
                 .withTest(xml).ignoreWhitespace().build();
 
         assertThat(documentDiff.hasDifferences())
@@ -187,8 +151,6 @@ public class SetupGitSshTaskTest {
         assertThat(testee).isNotNull();
         assertThat(testee.getId()).isEqualTo("x");
         assertThat(testee.getName()).isNull();
-        assertThat(testee.getPassword()).isNull();
-        assertThat(testee.getProvider()).isNull();
         assertThat(testee.getHost()).isNull();
         assertThat(testee.getResource()).isNotEmpty();
         assertThat(testee.getFxml()).isNotEmpty();

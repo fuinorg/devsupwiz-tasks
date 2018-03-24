@@ -35,12 +35,11 @@ import org.controlsfx.control.decoration.GraphicDecoration;
 import org.fuin.devsupwiz.common.Loggable;
 import org.fuin.devsupwiz.common.SetupController;
 import org.fuin.devsupwiz.common.SetupTask;
+import org.fuin.devsupwiz.common.UserInput;
 
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
 /**
@@ -51,12 +50,6 @@ public class SetupGitSshController implements SetupController {
 
     @FXML
     private TextField name;
-
-    @FXML
-    private PasswordField password;
-
-    @FXML
-    private ComboBox<String> provider;
 
     @FXML
     private TextField host;
@@ -78,17 +71,6 @@ public class SetupGitSshController implements SetupController {
         }
         task = (SetupGitSshTask) setupTask;
 
-        /*
-         * TODO Add github provider for (final GitProvider value :
-         * GitProvider.values()) {
-         * provider.getItems().add(value.name().toLowerCase()); }
-         */
-        provider.getItems().add(GitProvider.BITBUCKET.name().toLowerCase());
-        if (task.getProvider() == null) {
-            provider.setValue(GitProvider.BITBUCKET.name().toLowerCase());
-        } else {
-            provider.setValue(task.getProvider().name().toLowerCase());
-        }
         host.setText(task.getHost());
 
         refreshStatus();
@@ -102,12 +84,10 @@ public class SetupGitSshController implements SetupController {
         if (!task.alreadyExecuted()) {
 
             // Execute bean validation using a new task instance
-            final String selected = provider.getValue().toUpperCase();
             final SetupGitSshTask t = new SetupGitSshTask("x", name.getText(),
-                    password.getText(), GitProvider.valueOf(selected),
-                    host.getText(), false);
+                    host.getText());
             final Set<ConstraintViolation<SetupGitSshTask>> violations = validator
-                    .validate(t);
+                    .validate(t, UserInput.class);
             for (final ConstraintViolation<SetupGitSshTask> violation : violations) {
                 errors.add(violation.getMessage());
             }
@@ -116,11 +96,6 @@ public class SetupGitSshController implements SetupController {
             Decorator.removeAllDecorations(name);
             if (violated(violations, name.getId())) {
                 Decorator.addDecoration(name, new GraphicDecoration(
-                        createIconError16x16(), Pos.TOP_RIGHT));
-            }
-            Decorator.removeAllDecorations(password);
-            if (violated(violations, password.getId())) {
-                Decorator.addDecoration(password, new GraphicDecoration(
                         createIconError16x16(), Pos.TOP_RIGHT));
             }
             Decorator.removeAllDecorations(host);
@@ -138,9 +113,6 @@ public class SetupGitSshController implements SetupController {
     @Override
     public void save() {
         task.setName(name.getText());
-        task.setPassword(password.getText());
-        final String selected = provider.getValue().toUpperCase();
-        task.setProvider(GitProvider.valueOf(selected));
         task.setHost(host.getText());
     }
 
@@ -153,8 +125,6 @@ public class SetupGitSshController implements SetupController {
     public void refreshStatus() {
         final boolean alreadyExecuted = task.alreadyExecuted();
         name.setDisable(alreadyExecuted);
-        password.setDisable(alreadyExecuted);
-        provider.setDisable(alreadyExecuted);
         host.setDisable(alreadyExecuted);
         if (alreadyExecuted) {
             title.setGraphic(createIconOk24x24());

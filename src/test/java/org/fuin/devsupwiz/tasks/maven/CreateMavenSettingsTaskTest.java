@@ -18,17 +18,22 @@
 package org.fuin.devsupwiz.tasks.maven;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Set;
 
-import javax.enterprise.inject.se.SeContainer;
-import javax.enterprise.inject.se.SeContainerInitializer;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.groups.Default;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.fuin.devsupwiz.common.ConfigImpl;
+import org.fuin.devsupwiz.common.DevSupWizUtils;
+import org.fuin.devsupwiz.common.UserInput;
 import org.fuin.utils4j.JaxbUtils;
 import org.junit.Test;
 import org.xmlunit.builder.DiffBuilder;
@@ -62,6 +67,8 @@ public class CreateMavenSettingsTaskTest {
         final CreateMavenSettingsTask testee = new CreateMavenSettingsTask(
                 templateFile.toString(), "peter.parker", "secret123",
                 targetFile);
+        final ConfigImpl config = new ConfigImpl("test", testee);
+        config.init();
 
         // TEST
         testee.execute();
@@ -72,24 +79,18 @@ public class CreateMavenSettingsTaskTest {
     }
 
     @Test
-    public void testExecuteValidateInstance() {
+    public void testValidateInstance() {
 
-        try (final SeContainer container = SeContainerInitializer.newInstance()
-                .initialize()) {
-            final CreateMavenSettingsTask testee = container
-                    .select(CreateMavenSettingsTask.class).get();
-            try {
-                testee.execute();
-                fail();
-            } catch (final IllegalStateException ex) {
-                assertThat(ex.getMessage()).startsWith("The instance of type '"
-                        + CreateMavenSettingsTask.class.getName() + "' "
-                        + "was invalid when calling method");
-                assertThat(ex.getMessage()).contains("Template is required");
-                assertThat(ex.getMessage()).contains("Username is required");
-                assertThat(ex.getMessage()).contains("Password is required");
-            }
-        }
+        final CreateMavenSettingsTask testee = new CreateMavenSettingsTask();
+
+        final Validator validator = Validation.buildDefaultValidatorFactory()
+                .getValidator();
+        final Set<ConstraintViolation<CreateMavenSettingsTask>> violations = validator
+                .validate(testee, Default.class, UserInput.class);
+
+        assertThat(DevSupWizUtils.violated(violations, "template")).isTrue();
+        assertThat(DevSupWizUtils.violated(violations, "name")).isTrue();
+        assertThat(DevSupWizUtils.violated(violations, "password")).isTrue();
 
     }
 
@@ -108,7 +109,7 @@ public class CreateMavenSettingsTaskTest {
 
         // VERIFY
         final Diff documentDiff = DiffBuilder.compare(JaxbUtils.XML_PREFIX
-                + "<create-maven-settings template=\"~/.m2/settings.xml\"/>")
+                + "<create-maven-settings template=\"~/.m2/settings.xml\" name=\"peter.parker\"/>")
                 .withTest(xml).ignoreWhitespace().build();
 
         assertThat(documentDiff.hasDifferences())

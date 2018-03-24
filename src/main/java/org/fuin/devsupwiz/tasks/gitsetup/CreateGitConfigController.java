@@ -34,9 +34,12 @@ import javax.validation.Validator;
 
 import org.controlsfx.control.decoration.Decorator;
 import org.controlsfx.control.decoration.GraphicDecoration;
+import org.fuin.devsupwiz.common.Config;
 import org.fuin.devsupwiz.common.Loggable;
 import org.fuin.devsupwiz.common.SetupController;
 import org.fuin.devsupwiz.common.SetupTask;
+import org.fuin.devsupwiz.common.UserInput;
+import org.fuin.devsupwiz.tasks.personal.SetPersonalDataTask;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -66,6 +69,9 @@ public class CreateGitConfigController
 
     @Inject
     private Validator validator;
+    
+    @Inject
+    private Config config;
 
     private CreateGitConfigTask task;
 
@@ -82,10 +88,18 @@ public class CreateGitConfigController
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
+        
+        if (!task.alreadyExecuted()) {
+            final SetPersonalDataTask pdTask = config.findTask(SetPersonalDataTask.KEY);
+            if (pdTask != null) {
+                name.setText(pdTask.getFullName());
+            }
+        }
+        
         for (final PushDefault value : PushDefault.values()) {
             pushDefault.getItems().add(value.name().toLowerCase());
         }
-        pushDefault.setValue(PushDefault.SIMPLE.name().toLowerCase());
+        pushDefault.setValue(task.getPushDefault().name().toLowerCase());
     }
 
     @Override
@@ -101,7 +115,7 @@ public class CreateGitConfigController
                     name.textProperty().get(), email.textProperty().get(),
                     PushDefault.valueOf(selected));
             final Set<ConstraintViolation<CreateGitConfigTask>> violations = validator
-                    .validate(t);
+                    .validate(t, UserInput.class);
             for (final ConstraintViolation<CreateGitConfigTask> violation : violations) {
                 errors.add(violation.getMessage());
             }

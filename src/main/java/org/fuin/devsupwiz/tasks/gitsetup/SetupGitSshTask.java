@@ -26,38 +26,34 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.Security;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
 
+import javax.enterprise.inject.Vetoed;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.commons.io.FileUtils;
 import org.fuin.devsupwiz.common.AbstractSetupTask;
 import org.fuin.devsupwiz.common.DevSupWizUtils;
 import org.fuin.devsupwiz.common.MultipleInstancesSetupTask;
-import org.fuin.devsupwiz.common.ValidateInstance;
+import org.fuin.devsupwiz.common.UserInput;
 import org.fuin.utils4j.Utils4J;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
-
 /**
  * Generates a key pair and adds it to the "~/.ssh/config" file. The public key
  * is also submitted to the git provider (Bitbucket, Github) using a REST API.
  */
+@Vetoed
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = SetupGitSshTask.KEY)
-public class SetupGitSshTask extends AbstractSetupTask implements MultipleInstancesSetupTask {
+public final class SetupGitSshTask extends AbstractSetupTask
+        implements MultipleInstancesSetupTask {
 
     /** Unique normalized name of the task (for example used for FXML file). */
     static final String KEY = "setup-git-ssh";
@@ -69,64 +65,43 @@ public class SetupGitSshTask extends AbstractSetupTask implements MultipleInstan
     @XmlAttribute(name = "id")
     private String id;
 
-    @NotEmpty(message = "{setup-git-ssh.name.empty}")
-    @XmlTransient
+    @NotEmpty(message = "{setup-git-ssh.name.empty}", groups = {
+            UserInput.class })
+    @XmlAttribute(name = "name")
     private String name;
 
-    @NotEmpty(message = "{setup-git-ssh.password.empty}")
-    @XmlTransient
-    private String password;
-
-    @NotNull(message = "{setup-git-ssh.provider.null}")
-    @XmlAttribute(name = "provider")
-    private String provider;
-
-    @NotEmpty(message = "{setup-git-ssh.host.empty}")
+    @NotEmpty(message = "{setup-git-ssh.host.empty}", groups = {
+            UserInput.class })
     @XmlAttribute(name = "host")
     private String host;
 
+    @XmlAttribute(name = "public-key")
+    private String publicKey;
+
     @NotNull(message = "sshDir==null")
-    @XmlTransient
-    private File sshDir;
-
-    @XmlTransient
-    private boolean postPublicKey;
-
-    @XmlTransient
-    private Preferences userPrefs;
+    private transient File sshDir;
 
     /**
      * Default constructor for JAXB.
      */
     protected SetupGitSshTask() {
         super();
-        sshDir = new File(Utils4J.getUserHomeDir(), ".ssh");
-        postPublicKey = true;
-        userPrefs = Preferences.userRoot();
+        sshDir = getDefaultSshDir();
     }
 
     /**
-     * Constructor for tests.
+     * Constructor with predefined values.
      * 
      * @param id
      *            Unique task identifier.
      * @param name
      *            User's name.
-     * @param password
-     *            User's password.
-     * @param provider
-     *            Git provider.
      * @param host
      *            Host name (Domain without "www").
-     * @param postPublicKey
-     *            Post public key via REST API to provider.
      */
     public SetupGitSshTask(@NotEmpty final String id,
-            @NotEmpty final String name, @NotEmpty final String password,
-            @NotNull final GitProvider provider, @NotEmpty final String host,
-            final boolean postPublicKey) {
-        this(id, name, password, provider, host,
-                new File(Utils4J.getUserHomeDir(), ".ssh"), postPublicKey);
+            @NotEmpty final String name, @NotEmpty final String host) {
+        this(id, name, host, getDefaultSshDir());
     }
 
     /**
@@ -136,30 +111,18 @@ public class SetupGitSshTask extends AbstractSetupTask implements MultipleInstan
      *            Unique task identifier.
      * @param name
      *            User's name.
-     * @param password
-     *            User's password.
-     * @param provider
-     *            Git provider.
      * @param host
      *            Host name (Domain without "www").
      * @param sshDir
      *            SSH directory.
-     * @param postPublicKey
-     *            Post public key via REST API to provider.
      */
-    public SetupGitSshTask(@NotEmpty final String id,
-            @NotEmpty final String name, @NotEmpty final String password,
-            @NotNull final GitProvider provider, @NotEmpty final String host,
-            @NotNull final File sshDir, final boolean postPublicKey) {
+    SetupGitSshTask(@NotEmpty final String id, @NotEmpty final String name,
+            @NotEmpty final String host, @NotNull final File sshDir) {
         super();
         this.id = id;
         this.name = name;
-        this.password = password;
-        this.provider = provider.name().toLowerCase();
         this.host = host;
         this.sshDir = sshDir;
-        this.postPublicKey = postPublicKey;
-        this.userPrefs = Preferences.userRoot();
     }
 
     /**
@@ -167,7 +130,7 @@ public class SetupGitSshTask extends AbstractSetupTask implements MultipleInstan
      * 
      * @return First name and last name.
      */
-    public String getName() {
+    public final String getName() {
         return name;
     }
 
@@ -177,49 +140,8 @@ public class SetupGitSshTask extends AbstractSetupTask implements MultipleInstan
      * @param name
      *            First name and last name.
      */
-    public void setName(@NotEmpty final String name) {
+    public final void setName(@NotEmpty final String name) {
         this.name = name;
-    }
-
-    /**
-     * Returns user's password.
-     * 
-     * @return Password.
-     */
-    public String getPassword() {
-        return password;
-    }
-
-    /**
-     * Sets user's password.
-     * 
-     * @param password
-     *            Password.
-     */
-    public void setPassword(@NotEmpty final String password) {
-        this.password = password;
-    }
-
-    /**
-     * Returns the provider.
-     * 
-     * @return Git provider.
-     */
-    public GitProvider getProvider() {
-        if (provider == null) {
-            return null;
-        }
-        return GitProvider.valueOf(provider.toUpperCase());
-    }
-
-    /**
-     * Sets the provider.
-     * 
-     * @param provider
-     *            Git provider.
-     */
-    public void setProvider(@NotNull final GitProvider provider) {
-        this.provider = provider.name().toLowerCase();
     }
 
     /**
@@ -227,7 +149,7 @@ public class SetupGitSshTask extends AbstractSetupTask implements MultipleInstan
      * 
      * @return Host name (Domain without "www").
      */
-    public String getHost() {
+    public final String getHost() {
         return host;
     }
 
@@ -235,55 +157,47 @@ public class SetupGitSshTask extends AbstractSetupTask implements MultipleInstan
      * Sets host name.
      * 
      * @param host
-     *            Host name (Domain without "www").
+     *            Host name (Domain without "www" like "github.com" or
+     *            "bitbucket.org").
      */
-    public void setHost(@NotEmpty final String host) {
+    public final void setHost(@NotEmpty final String host) {
         this.host = host;
     }
 
-    @Override
-    public boolean alreadyExecuted() {
-        return userPrefs.getBoolean(getTypeId(), false);
+    /**
+     * Returns the public key that was generated.
+     * 
+     * @return SSH public key.
+     */
+    public final String getPublicKey() {
+        return publicKey;
     }
 
-    @ValidateInstance
     @Override
-    public void execute() {
+    public final void execute() {
 
         MDC.put(MDC_TASK_KEY, getTypeId());
         try {
 
-            if (!alreadyExecuted()) {
+            if (alreadyExecuted()) {
+                LOG.debug("Task already executed: " + getTypeId());
+
+            } else {
+                LOG.debug("Task not executed: " + getTypeId());
 
                 init();
 
                 final SshKeyPairGenerator generator = generateKeys(sshDir,
                         getPrivateKeyFile(), getPublicKeyFile());
-                if (postPublicKey) {
-                    if (GitProvider.BITBUCKET == getProvider()) {
-                        postPublicKeyToBitbucket(generator.getPublicKey());
-                    } else if (GitProvider.GITHUB == getProvider()) {
-                        throw new UnsupportedOperationException("Provider "
-                                + GitProvider.GITHUB + " is not supported yet");
-                    } else {
-                        throw new IllegalStateException(
-                                "Provider unknown: " + provider);
-                    }
-                }
-                
                 appendToConfig(getPrivateKeyFile());
+                publicKey = generator.getPublicKey();
 
-                if (postPublicKey) {
+                // Only add in productiion mode (not test)
+                if (sshDir.equals(getDefaultSshDir())) {
                     DevSupWizUtils.addToSshKnownHosts(host);
                 }
 
-                try {
-                    userPrefs.putBoolean(getTypeId(), true);
-                    userPrefs.flush();
-                } catch (final BackingStoreException ex) {
-                    throw new RuntimeException("Failed to save the setup key '"
-                            + getTypeId() + "'", ex);
-                }
+                success();
                 LOG.info("Successfully finished SSH git setup");
 
             }
@@ -295,36 +209,36 @@ public class SetupGitSshTask extends AbstractSetupTask implements MultipleInstan
     }
 
     @Override
-    public String getResource() {
+    public final String getResource() {
         return this.getClass().getPackage().getName().replace('.', '/') + "/"
                 + KEY;
     }
 
     @Override
-    public String getFxml() {
+    public final String getFxml() {
         return "/" + getResource() + ".fxml";
     }
 
     @Override
-    public String getId() {
+    public final String getId() {
         return id;
     }
 
     @Override
-    public String getType() {
+    public final String getType() {
         return KEY;
     }
 
     @Override
-    public String getTypeId() {
+    public final String getTypeId() {
         return getType() + "[" + getId() + "]";
     }
 
-    private String getKeyFilename() {
+    private final String getKeyFilename() {
         return name + "-" + host;
     }
 
-    File getConfigFile() {
+    final File getConfigFile() {
         return new File(sshDir, "config");
     }
 
@@ -346,7 +260,10 @@ public class SetupGitSshTask extends AbstractSetupTask implements MultipleInstan
 
         // Ensure SSH directory exists
         if (!sshDir.exists()) {
-            if (!sshDir.mkdirs()) {
+            LOG.debug("Directory does not exist: " + sshDir);
+            if (sshDir.mkdirs()) {
+                LOG.debug("Created directory: " + sshDir);
+            } else {
                 throw new IllegalStateException(
                         "Failed to create directory: " + sshDir);
             }
@@ -378,35 +295,6 @@ public class SetupGitSshTask extends AbstractSetupTask implements MultipleInstan
         }
     }
 
-    private void postPublicKeyToBitbucket(final String publicKey) {
-        final String url = "https://api.bitbucket.org/1.0/users/" + name
-                + "/ssh-keys";
-        try {
-            final String hostname = DevSupWizUtils.getHostname();
-
-            final HttpResponse<String> jsonResponse = Unirest.post(url)
-                    .basicAuth(name, password)
-                    .header("accept", "application/json")
-                    .field("label", hostname).field("key", publicKey)
-                    .asString();
-            LOG.info("[" + jsonResponse.getStatus() + "] "
-                    + jsonResponse.getStatusText() + ": " + jsonResponse);
-            jsonResponse.getHeaders().forEach((key, values) -> {
-                LOG.info(key + "=" + values);
-            });
-            if (jsonResponse.getStatus() != 200) {
-                throw new RuntimeException("Error posting public key: "
-                        + jsonResponse.getStatusText() + " ["
-                        + jsonResponse.getStatus() + "]");
-            }
-            LOG.info("Successfully posted public ssh key: {}", url);
-            LOG.debug(jsonResponse.getBody());
-        } catch (final UnirestException ex) {
-            throw new RuntimeException(
-                    "Wasn't able to post public ssh key to: " + url, ex);
-        }
-    }
-
     private void appendToConfig(final File prvKeyFile) {
         try {
 
@@ -426,6 +314,10 @@ public class SetupGitSshTask extends AbstractSetupTask implements MultipleInstan
             throw new RuntimeException(
                     "Wasn't able to write ssh config: " + getConfigFile(), ex);
         }
+    }
+
+    private static File getDefaultSshDir() {
+        return new File(Utils4J.getUserHomeDir(), ".ssh");
     }
 
 }

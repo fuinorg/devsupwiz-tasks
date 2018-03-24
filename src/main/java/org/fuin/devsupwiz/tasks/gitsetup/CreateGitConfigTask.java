@@ -23,28 +23,30 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import javax.enterprise.inject.Vetoed;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.commons.io.FileUtils;
 import org.fuin.devsupwiz.common.AbstractSetupTask;
-import org.fuin.devsupwiz.common.ValidateInstance;
+import org.fuin.devsupwiz.common.UserInput;
 import org.fuin.utils4j.Utils4J;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 /**
- * Creates and populates the "~/.gitconfig" file.
- * Only one instance of this type is allowed 
+ * Creates and populates the "~/.gitconfig" file. Only one instance of this type
+ * is allowed
  */
+@Vetoed
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = CreateGitConfigTask.KEY)
-public class CreateGitConfigTask extends AbstractSetupTask {
+public final class CreateGitConfigTask extends AbstractSetupTask {
 
     /** Unique normalized name of the task (for example used for FXML file). */
     static final String KEY = "create-git-config";
@@ -52,21 +54,23 @@ public class CreateGitConfigTask extends AbstractSetupTask {
     private static final Logger LOG = LoggerFactory
             .getLogger(CreateGitConfigTask.class);
 
-    @NotEmpty(message = "{create-git-config.name.empty}")
-    @XmlTransient
+    @NotEmpty(message = "{create-git-config.name.empty}", groups = {
+            UserInput.class })
+    @XmlAttribute(name = "name")
     private String name;
 
-    @NotEmpty(message = "{create-git-config.email.empty}")
-    @XmlTransient
+    @NotEmpty(message = "{create-git-config.email.empty}", groups = {
+            UserInput.class })
+    @XmlAttribute(name = "email")
     private String email;
 
-    @NotNull(message = "{create-git-config.push-default.empty}")
-    @XmlTransient
+    @NotNull(message = "{create-git-config.push-default.empty}", groups = {
+            UserInput.class })
+    @XmlAttribute(name = "push-default")
     private PushDefault pushDefault;
 
     @NotNull(message = "configFile==null")
-    @XmlTransient
-    private File configFile;
+    private transient File configFile;
 
     /**
      * Default constructor for JAXB.
@@ -74,6 +78,7 @@ public class CreateGitConfigTask extends AbstractSetupTask {
     protected CreateGitConfigTask() {
         super();
         this.configFile = new File(Utils4J.getUserHomeDir(), ".gitconfig");
+        this.pushDefault = PushDefault.SIMPLE;
     }
 
     /**
@@ -121,7 +126,7 @@ public class CreateGitConfigTask extends AbstractSetupTask {
      * 
      * @return First name and last name.
      */
-    public String getName() {
+    public final String getName() {
         return name;
     }
 
@@ -131,7 +136,7 @@ public class CreateGitConfigTask extends AbstractSetupTask {
      * @param name
      *            First name and last name.
      */
-    public void setName(@NotEmpty final String name) {
+    public final void setName(@NotEmpty final String name) {
         this.name = name;
     }
 
@@ -140,7 +145,7 @@ public class CreateGitConfigTask extends AbstractSetupTask {
      * 
      * @return Email address.
      */
-    public String getEmail() {
+    public final String getEmail() {
         return email;
     }
 
@@ -150,7 +155,7 @@ public class CreateGitConfigTask extends AbstractSetupTask {
      * @param email
      *            Email address.
      */
-    public void setEmail(@NotEmpty final String email) {
+    public final void setEmail(@NotEmpty final String email) {
         this.email = email;
     }
 
@@ -159,7 +164,7 @@ public class CreateGitConfigTask extends AbstractSetupTask {
      * 
      * @return Push default.
      */
-    public PushDefault getPushDefault() {
+    public final PushDefault getPushDefault() {
         return pushDefault;
     }
 
@@ -169,18 +174,12 @@ public class CreateGitConfigTask extends AbstractSetupTask {
      * @param pushDefault
      *            Push default.
      */
-    public void setPushDefault(@NotNull final PushDefault pushDefault) {
+    public final void setPushDefault(@NotNull final PushDefault pushDefault) {
         this.pushDefault = pushDefault;
     }
 
     @Override
-    public boolean alreadyExecuted() {
-        return configFile.exists();
-    }
-
-    @ValidateInstance
-    @Override
-    public void execute() {
+    public final void execute() {
 
         MDC.put(MDC_TASK_KEY, getType());
         try {
@@ -195,6 +194,7 @@ public class CreateGitConfigTask extends AbstractSetupTask {
                     FileUtils.writeStringToFile(configFile, str,
                             Charset.forName("utf-8"));
 
+                    success();
                     LOG.info("Successfully create git config: {}", configFile);
 
                 } catch (final IOException ex) {
@@ -211,23 +211,23 @@ public class CreateGitConfigTask extends AbstractSetupTask {
     }
 
     @Override
-    public String getResource() {
+    public final String getResource() {
         return this.getClass().getPackage().getName().replace('.', '/') + "/"
                 + KEY;
     }
 
     @Override
-    public String getFxml() {
+    public final String getFxml() {
         return "/" + getResource() + ".fxml";
     }
 
     @Override
-    public String getType() {
+    public final String getType() {
         return KEY;
     }
 
     @Override
-    public String getTypeId() {
+    public final String getTypeId() {
         return KEY;
     }
 

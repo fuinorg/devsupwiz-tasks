@@ -2,9 +2,9 @@
 	<tasks>
 		<set-personal-data />
 		<set-hostname />
-		<create-git-config />
-		<setup-git-ssh id="1" provider="bitbucket" host="bitbucket.org" />
-		<git-clone id="1" target-dir="~/git" >
+		<create-git-config push-default="SIMPLE" />
+		<setup-git-ssh id="1" host="bitbucket.org" />
+		<git-clone id="1" target-dir="~/git">
 			<repository>git@bitbucket.org:tutorials/tutorials.git.bitbucket.org.git</repository>
 			<repository>git@bitbucket.org:tutorials/online-edit-starter.git</repository>
 		</git-clone>

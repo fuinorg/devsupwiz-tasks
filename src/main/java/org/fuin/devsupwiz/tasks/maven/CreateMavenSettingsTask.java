@@ -25,19 +25,19 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import javax.enterprise.inject.Vetoed;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fuin.devsupwiz.common.AbstractSetupTask;
 import org.fuin.devsupwiz.common.DevSupWizUtils;
-import org.fuin.devsupwiz.common.ValidateInstance;
+import org.fuin.devsupwiz.common.UserInput;
 import org.fuin.utils4j.Utils4J;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,9 +46,10 @@ import org.slf4j.MDC;
 /**
  * Creates and populates the "~/.m2/settings.xml" file.
  */
+@Vetoed
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = CreateMavenSettingsTask.KEY)
-public class CreateMavenSettingsTask extends AbstractSetupTask {
+public final class CreateMavenSettingsTask extends AbstractSetupTask {
 
     private static final String M2_SETTINGS_XML = ".m2/settings.xml";
 
@@ -62,17 +63,17 @@ public class CreateMavenSettingsTask extends AbstractSetupTask {
     @XmlAttribute(name = "template")
     private String template;
 
-    @NotEmpty(message = "{create-maven-settings.name.empty}")
-    @XmlTransient
+    @NotEmpty(message = "{create-maven-settings.name.empty}", groups = {
+            UserInput.class })
+    @XmlAttribute(name = "name")
     private String name;
 
-    @NotEmpty(message = "{create-maven-settings.password.empty}")
-    @XmlTransient
-    private String password;
+    @NotEmpty(message = "{create-maven-settings.password.empty}", groups = {
+            UserInput.class })
+    private transient String password;
 
     @NotNull(message = "settingsFile==null")
-    @XmlTransient
-    private File settingsFile;
+    private transient File settingsFile;
 
     /**
      * Default constructor for JAXB.
@@ -125,7 +126,7 @@ public class CreateMavenSettingsTask extends AbstractSetupTask {
      * 
      * @return Source template for the "settings.xml".
      */
-    public String getTemplate() {
+    public final String getTemplate() {
         return template;
     }
 
@@ -135,7 +136,7 @@ public class CreateMavenSettingsTask extends AbstractSetupTask {
      * @param template
      *            Source template for the "settings.xml".
      */
-    public void setTemplate(@NotEmpty final String template) {
+    public final void setTemplate(@NotEmpty final String template) {
         this.template = template;
     }
 
@@ -144,7 +145,7 @@ public class CreateMavenSettingsTask extends AbstractSetupTask {
      * 
      * @return Template file.
      */
-    public File getTemplateFile() {
+    public final File getTemplateFile() {
         if (template == null) {
             throw new IllegalStateException(
                     "The template name for the 'settings.xml' is not set");
@@ -163,7 +164,7 @@ public class CreateMavenSettingsTask extends AbstractSetupTask {
      * 
      * @return User name for Maven repository.
      */
-    public String getName() {
+    public final String getName() {
         return name;
     }
 
@@ -173,7 +174,7 @@ public class CreateMavenSettingsTask extends AbstractSetupTask {
      * @param name
      *            User name for Maven repository.
      */
-    public void setName(@NotEmpty final String name) {
+    public final void setName(@NotEmpty final String name) {
         this.name = name;
     }
 
@@ -182,7 +183,7 @@ public class CreateMavenSettingsTask extends AbstractSetupTask {
      * 
      * @return Maven repository password.
      */
-    public String getPassword() {
+    public final String getPassword() {
         return password;
     }
 
@@ -192,18 +193,12 @@ public class CreateMavenSettingsTask extends AbstractSetupTask {
      * @param password
      *            Maven repository password.
      */
-    public void setPassword(@NotEmpty final String password) {
+    public final void setPassword(@NotEmpty final String password) {
         this.password = password;
     }
 
     @Override
-    public boolean alreadyExecuted() {
-        return settingsFile.exists();
-    }
-
-    @ValidateInstance
-    @Override
-    public void execute() {
+    public final void execute() {
 
         MDC.put(MDC_TASK_KEY, getType());
         try {
@@ -233,6 +228,7 @@ public class CreateMavenSettingsTask extends AbstractSetupTask {
                     DevSupWizUtils.setFilePermissions(settingsFile, OWNER_READ,
                             OWNER_WRITE);
 
+                    success();
                     LOG.info("Successfully create Maven settings: {}",
                             settingsFile);
 
@@ -251,24 +247,24 @@ public class CreateMavenSettingsTask extends AbstractSetupTask {
     }
 
     @Override
-    public String getResource() {
+    public final String getResource() {
         return this.getClass().getPackage().getName().replace('.', '/') + "/"
                 + KEY;
     }
 
     @Override
-    public String getFxml() {
+    public final String getFxml() {
         return "/" + getResource() + ".fxml";
     }
 
     @Override
-    public String getType() {
+    public final String getType() {
         return KEY;
     }
 
     @Override
-    public String getTypeId() {
+    public final String getTypeId() {
         return KEY;
     }
-    
+
 }

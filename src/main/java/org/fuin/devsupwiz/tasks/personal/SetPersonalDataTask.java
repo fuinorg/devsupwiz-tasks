@@ -19,17 +19,15 @@ package org.fuin.devsupwiz.tasks.personal;
 
 import static org.fuin.devsupwiz.common.DevSupWizUtils.MDC_TASK_KEY;
 
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
-
+import javax.enterprise.inject.Vetoed;
 import javax.validation.constraints.NotEmpty;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import org.fuin.devsupwiz.common.AbstractSetupTask;
-import org.fuin.devsupwiz.common.ValidateInstance;
+import org.fuin.devsupwiz.common.UserInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -38,12 +36,13 @@ import org.slf4j.MDC;
  * Sets the developer's personal data like name and email address. There can
  * only be one task of this type in a configuration.
  */
+@Vetoed
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = SetPersonalDataTask.KEY)
-public class SetPersonalDataTask extends AbstractSetupTask {
+public final class SetPersonalDataTask extends AbstractSetupTask {
 
     /** Unique normalized name of the task (for example used for FXML file). */
-    static final String KEY = "set-personal-data";
+    public static final String KEY = "set-personal-data";
 
     /** Key to retrieve first name from the user preferences. */
     public static final String FIRST_NAME_KEY = KEY + ".firstName";
@@ -57,19 +56,16 @@ public class SetPersonalDataTask extends AbstractSetupTask {
     private static final Logger LOG = LoggerFactory
             .getLogger(SetPersonalDataTask.class);
 
-    @XmlTransient
-    private Preferences userPrefs;
-
-    @NotEmpty(message = "{first-name.empty}")
-    @XmlTransient
+    @XmlAttribute(name = "first-name")
+    @NotEmpty(message = "{first-name.empty}", groups = { UserInput.class })
     private String firstName;
 
-    @NotEmpty(message = "{last-name.empty}")
-    @XmlTransient
+    @XmlAttribute(name = "last-name")
+    @NotEmpty(message = "{last-name.empty}", groups = { UserInput.class })
     private String lastName;
 
-    @NotEmpty(message = "{email.empty}")
-    @XmlTransient
+    @XmlAttribute(name = "exmail")
+    @NotEmpty(message = "{email.empty}", groups = { UserInput.class })
     private String email;
 
     /**
@@ -77,7 +73,6 @@ public class SetPersonalDataTask extends AbstractSetupTask {
      */
     protected SetPersonalDataTask() {
         super();
-        userPrefs = Preferences.userRoot();
     }
 
     /**
@@ -93,7 +88,6 @@ public class SetPersonalDataTask extends AbstractSetupTask {
     public SetPersonalDataTask(@NotEmpty final String firstName,
             @NotEmpty final String lastName, @NotEmpty final String email) {
         super();
-        userPrefs = Preferences.userRoot();
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -104,7 +98,7 @@ public class SetPersonalDataTask extends AbstractSetupTask {
      * 
      * @return First name (like 'Peter').
      */
-    public String getFirstName() {
+    public final String getFirstName() {
         return firstName;
     }
 
@@ -114,7 +108,7 @@ public class SetPersonalDataTask extends AbstractSetupTask {
      * @param firstName
      *            First name (like 'Peter').
      */
-    public void setFirstName(@NotEmpty final String firstName) {
+    public final void setFirstName(@NotEmpty final String firstName) {
         this.firstName = firstName;
     }
 
@@ -123,7 +117,7 @@ public class SetPersonalDataTask extends AbstractSetupTask {
      * 
      * @return Last name (like 'Parker').
      */
-    public String getLastName() {
+    public final String getLastName() {
         return lastName;
     }
 
@@ -133,8 +127,28 @@ public class SetPersonalDataTask extends AbstractSetupTask {
      * @param lastName
      *            Last name (like 'Parker').
      */
-    public void setLastName(@NotEmpty final String lastName) {
+    public final void setLastName(@NotEmpty final String lastName) {
         this.lastName = lastName;
+    }
+
+    /**
+     * Returns first plus lastname divided by a space. If only one of the names
+     * is set this one is returned. Returns an empty space if none of them is
+     * set.
+     * 
+     * @return Full name.
+     */
+    public final String getFullName() {
+        if (firstName == null) {
+            if (lastName == null) {
+                return "";
+            }
+            return lastName;
+        }
+        if (lastName == null) {
+            return firstName;
+        }
+        return firstName + " " + lastName;
     }
 
     /**
@@ -142,7 +156,7 @@ public class SetPersonalDataTask extends AbstractSetupTask {
      * 
      * @return Email (like 'peter.parker@wherever-not-existing.com').
      */
-    public String getEmail() {
+    public final String getEmail() {
         return email;
     }
 
@@ -152,16 +166,10 @@ public class SetPersonalDataTask extends AbstractSetupTask {
      * @param email
      *            Email (like 'peter.parker@wherever-not-existing.com').
      */
-    public void setEmail(@NotEmpty final String email) {
+    public final void setEmail(@NotEmpty final String email) {
         this.email = email;
     }
 
-    @Override
-    public boolean alreadyExecuted() {
-        return userPrefs.getBoolean(KEY, false);
-    }
-
-    @ValidateInstance
     @Override
     public void execute() {
 
@@ -169,22 +177,10 @@ public class SetPersonalDataTask extends AbstractSetupTask {
         try {
 
             if (!alreadyExecuted()) {
-
-                try {
-                    userPrefs.putBoolean(KEY, true);
-                    userPrefs.put(FIRST_NAME_KEY, firstName);
-                    userPrefs.put(LAST_NAME_KEY, lastName);
-                    userPrefs.put(EMAIL_KEY, email);
-                    userPrefs.flush();
-                } catch (final BackingStoreException ex) {
-                    throw new RuntimeException(
-                            "Failed to save the personal data in the user's preferences",
-                            ex);
-                }
+                success();
                 LOG.info(
                         "Successfully saved the personal data: firstName='{}', lastName='{}', email='{}'",
                         firstName, lastName, email);
-
             }
 
         } finally {
@@ -194,23 +190,23 @@ public class SetPersonalDataTask extends AbstractSetupTask {
     }
 
     @Override
-    public String getResource() {
+    public final String getResource() {
         return this.getClass().getPackage().getName().replace('.', '/') + "/"
                 + KEY;
     }
 
     @Override
-    public String getFxml() {
+    public final String getFxml() {
         return "/" + getResource() + ".fxml";
     }
 
     @Override
-    public String getType() {
+    public final String getType() {
         return KEY;
     }
 
     @Override
-    public String getTypeId() {
+    public final String getTypeId() {
         return KEY;
     }
 

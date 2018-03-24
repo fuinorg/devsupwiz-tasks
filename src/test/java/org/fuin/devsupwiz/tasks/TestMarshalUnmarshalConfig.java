@@ -19,16 +19,17 @@ package org.fuin.devsupwiz.tasks;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.fuin.devsupwiz.common.ConfigImpl;
 import org.fuin.devsupwiz.tasks.gitsetup.CreateGitConfigTask;
 import org.fuin.devsupwiz.tasks.gitsetup.GitCloneTask;
-import org.fuin.devsupwiz.tasks.gitsetup.GitProvider;
 import org.fuin.devsupwiz.tasks.gitsetup.PushDefault;
 import org.fuin.devsupwiz.tasks.gitsetup.SetupGitSshTask;
 import org.fuin.devsupwiz.tasks.hostname.SetHostnameTask;
@@ -36,6 +37,7 @@ import org.fuin.devsupwiz.tasks.maven.CreateMavenSettingsTask;
 import org.fuin.devsupwiz.tasks.personal.SetPersonalDataTask;
 import org.fuin.utils4j.JaxbUtils;
 import org.fuin.utils4j.Utils4J;
+import org.junit.Before;
 import org.junit.Test;
 import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.diff.Diff;
@@ -45,14 +47,25 @@ import org.xmlunit.diff.Diff;
  */
 public class TestMarshalUnmarshalConfig {
 
+    private File configFile;
+
+    private URL configUrl;
+
+    @Before
+    public void setup() throws IOException {
+        configFile = new File("target/my-project-setup.xml");
+        configUrl = Utils4J
+                .url("classpath:org/fuin/devsupwiz/tasks/my-project-setup.xml");
+        FileUtils.copyURLToFile(configUrl, configFile);
+    }
+
     @Test
     public void testMarshal() throws IOException {
 
         // PREPARE
-        final URL url = Utils4J
-                .url("classpath:org/fuin/devsupwiz/tasks/my-project-setup.xml");
-        final String original = IOUtils.toString(url, Charset.forName("utf-8"));
-        final ConfigImpl testee = ConfigImpl.load(url);
+        final String original = IOUtils.toString(configUrl,
+                Charset.forName("utf-8"));
+        final ConfigImpl testee = ConfigImpl.load(configFile);
 
         // TEST
         final String xml = JaxbUtils.marshal(testee, ConfigImpl.class,
@@ -81,13 +94,12 @@ public class TestMarshalUnmarshalConfig {
         final CreateMavenSettingsTask createMavenSettingsTask = new CreateMavenSettingsTask(
                 "a", "b", "c");
         final SetupGitSshTask setupGitSshTask = new SetupGitSshTask("1", "a",
-                "b", GitProvider.GITHUB, "c", true);
+                "b");
         final GitCloneTask gitCloneTask = new GitCloneTask("1", "a",
                 new ArrayList<>());
 
         // TEST
-        final ConfigImpl testee = ConfigImpl.load(Utils4J.url(
-                "classpath:org/fuin/devsupwiz/tasks/my-project-setup.xml"));
+        final ConfigImpl testee = ConfigImpl.load(configFile);
 
         // VERIFY
         assertThat(testee).isNotNull();

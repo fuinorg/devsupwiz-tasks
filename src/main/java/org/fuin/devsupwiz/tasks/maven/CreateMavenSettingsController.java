@@ -35,6 +35,7 @@ import org.controlsfx.control.decoration.GraphicDecoration;
 import org.fuin.devsupwiz.common.Loggable;
 import org.fuin.devsupwiz.common.SetupController;
 import org.fuin.devsupwiz.common.SetupTask;
+import org.fuin.devsupwiz.common.UserInput;
 
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
@@ -84,7 +85,7 @@ public class CreateMavenSettingsController implements SetupController {
             final CreateMavenSettingsTask t = new CreateMavenSettingsTask("y",
                     name.getText(), password.getText());
             final Set<ConstraintViolation<CreateMavenSettingsTask>> violations = validator
-                    .validate(t);
+                    .validate(t, UserInput.class);
             for (final ConstraintViolation<CreateMavenSettingsTask> violation : violations) {
                 errors.add(violation.getMessage());
             }
