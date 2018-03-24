@@ -29,6 +29,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.fuin.devsupwiz.common.ConfigImpl;
 import org.fuin.devsupwiz.tasks.gitsetup.CreateGitConfigTask;
+import org.fuin.devsupwiz.tasks.gitsetup.DisplaySshKeyTask;
 import org.fuin.devsupwiz.tasks.gitsetup.GitCloneTask;
 import org.fuin.devsupwiz.tasks.gitsetup.PushDefault;
 import org.fuin.devsupwiz.tasks.gitsetup.GenerateSshKeyTask;
@@ -71,7 +72,9 @@ public class TestMarshalUnmarshalConfig {
         final String xml = JaxbUtils.marshal(testee, ConfigImpl.class,
                 CreateGitConfigTask.class, SetHostnameTask.class,
                 SetPersonalDataTask.class, GitCloneTask.class,
-                CreateMavenSettingsTask.class, GenerateSshKeyTask.class);
+                CreateMavenSettingsTask.class, GenerateSshKeyTask.class,
+                DisplaySshKeyTask.class);
+        System.out.println(xml);
 
         // VERIFY
         final Diff documentDiff = DiffBuilder.compare(original).withTest(xml)
@@ -93,8 +96,9 @@ public class TestMarshalUnmarshalConfig {
                 "a", "b", PushDefault.SIMPLE);
         final CreateMavenSettingsTask createMavenSettingsTask = new CreateMavenSettingsTask(
                 "a", "b", "c");
-        final GenerateSshKeyTask setupGitSshTask = new GenerateSshKeyTask("1", "a",
+        final GenerateSshKeyTask generateSshKeyTask = new GenerateSshKeyTask("1", "a",                
                 "b");
+        final DisplaySshKeyTask displaySshKeyTask = new DisplaySshKeyTask("1", "generate-ssh-key[1]");
         final GitCloneTask gitCloneTask = new GitCloneTask("1", "a",
                 new ArrayList<>());
 
@@ -105,8 +109,8 @@ public class TestMarshalUnmarshalConfig {
         assertThat(testee).isNotNull();
         assertThat(testee.getName()).isEqualTo("my-project");
         assertThat(testee.getTasks()).contains(setPersonalDataTask,
-                setHostnameTask, createGitConfigTask, setupGitSshTask,
-                gitCloneTask, createMavenSettingsTask);
+                setHostnameTask, createGitConfigTask, generateSshKeyTask,
+                gitCloneTask, createMavenSettingsTask, displaySshKeyTask);
 
     }
 

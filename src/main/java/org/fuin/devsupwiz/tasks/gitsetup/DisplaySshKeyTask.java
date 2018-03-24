@@ -17,9 +17,12 @@
  */
 package org.fuin.devsupwiz.tasks.gitsetup;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Vetoed;
 import javax.validation.constraints.NotEmpty;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import org.fuin.devsupwiz.common.AbstractSetupTask;
 import org.fuin.devsupwiz.common.MultipleInstancesSetupTask;
@@ -27,8 +30,10 @@ import org.fuin.devsupwiz.common.MultipleInstancesSetupTask;
 /**
  * Display a newly generated SSH public key to allow the user to copy it.
  */
-@ApplicationScoped
-public class DisplaySshKeyTask extends AbstractSetupTask
+@Vetoed
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name = DisplaySshKeyTask.KEY)
+public final class DisplaySshKeyTask extends AbstractSetupTask
         implements MultipleInstancesSetupTask {
 
     /** Unique normalized name of the task (for example used for FXML file). */
@@ -39,7 +44,7 @@ public class DisplaySshKeyTask extends AbstractSetupTask
     private String id;
 
     @NotEmpty
-    @XmlAttribute(name = "task-ref")
+    @XmlAttribute(name = "ref")
     private String taskRef;
 
     /**
@@ -61,7 +66,7 @@ public class DisplaySshKeyTask extends AbstractSetupTask
      * @param sshDir
      *            SSH directory.
      */
-    DisplaySshKeyTask(@NotEmpty final String id,
+    public DisplaySshKeyTask(@NotEmpty final String id,
             @NotEmpty final String taskRef) {
         super();
         this.id = id;
