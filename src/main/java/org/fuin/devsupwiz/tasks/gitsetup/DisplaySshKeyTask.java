@@ -59,12 +59,8 @@ public final class DisplaySshKeyTask extends AbstractSetupTask
      * 
      * @param id
      *            Unique task identifier.
-     * @param name
-     *            User's name.
-     * @param host
-     *            Host name (Domain without "www").
-     * @param sshDir
-     *            SSH directory.
+     * @param taskRef
+     *            Reference to the {@link GenerateSshKeyTask} to display it's public key.
      */
     public DisplaySshKeyTask(@NotEmpty final String id,
             @NotEmpty final String taskRef) {
