@@ -26,6 +26,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.Security;
+import java.util.HashMap;
 
 import javax.enterprise.inject.Vetoed;
 import javax.validation.constraints.NotEmpty;
@@ -38,12 +39,15 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.commons.io.FileUtils;
 import org.fuin.devsupwiz.common.AbstractSetupTask;
 import org.fuin.devsupwiz.common.DevSupWizUtils;
+import org.fuin.devsupwiz.common.LogOutputStream;
 import org.fuin.devsupwiz.common.MultipleInstancesSetupTask;
+import org.fuin.devsupwiz.common.ShellCommandExecutor;
 import org.fuin.devsupwiz.common.UserInput;
 import org.fuin.utils4j.Utils4J;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.slf4j.event.Level;
 
 /**
  * Generates an SSH key pair and adds it to the "~/.ssh/config" file.
@@ -187,7 +191,7 @@ public final class GenerateSshKeyTask extends AbstractSetupTask
 
             // Only add in productiion mode (not test)
             if (sshDir.equals(getDefaultSshDir())) {
-                DevSupWizUtils.addToSshKnownHosts(host);
+                addToSshKnownHosts(host);
             }
 
         } finally {
@@ -222,20 +226,24 @@ public final class GenerateSshKeyTask extends AbstractSetupTask
         return getType() + "[" + getId() + "]";
     }
 
-    private final String getKeyFilename() {
-        return name + "-" + host;
-    }
-
     final File getConfigFile() {
         return new File(sshDir, "config");
     }
+    
+    private File getSshHostDir() {
+        return new File(sshDir, host);
+    }
 
+    private final File getSshNameDir() {
+        return new File(getSshHostDir(), name);
+    }
+    
     private File getPrivateKeyFile() {
-        return new File(sshDir, getKeyFilename() + ".prv");
+        return new File(getSshNameDir(), "id_rsa");
     }
 
     private File getPublicKeyFile() {
-        return new File(sshDir, getKeyFilename() + ".pub");
+        return new File(getSshNameDir(), "id_rsa.pub");
     }
 
     private void init() {
@@ -306,6 +314,26 @@ public final class GenerateSshKeyTask extends AbstractSetupTask
 
     private static File getDefaultSshDir() {
         return new File(Utils4J.getUserHomeDir(), ".ssh");
+    }
+
+    /**
+     * Adds the given host without any check to the 'known_hosts' file.
+     * 
+     * @param host
+     *            Host to add (Usually without "www").
+     */
+    public static void addToSshKnownHosts(final String host) {
+
+        try {
+            final ShellCommandExecutor executor = new ShellCommandExecutor(
+                    "ssh -oStrictHostKeyChecking=no " + host, 5,
+                    new HashMap<String, String>(), new LogOutputStream(Level.INFO),
+                    new LogOutputStream(Level.ERROR));
+            final int result = executor.execute();
+            LOG.info("Executing SSH login to add host key returned # " + result);
+        } catch (final RuntimeException ex) {
+            LOG.info("Executing SSH login raised expected exception: " + ex.getMessage());
+        }
     }
 
 }
