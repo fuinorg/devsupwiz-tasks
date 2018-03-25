@@ -17,8 +17,6 @@
  */
 package org.fuin.devsupwiz.tasks.personal;
 
-import static org.fuin.devsupwiz.common.DevSupWizUtils.MDC_TASK_KEY;
-
 import javax.enterprise.inject.Vetoed;
 import javax.validation.constraints.NotEmpty;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -28,9 +26,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.fuin.devsupwiz.common.AbstractSetupTask;
 import org.fuin.devsupwiz.common.UserInput;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 /**
  * Sets the developer's personal data like name and email address. There can
@@ -52,9 +47,6 @@ public final class SetPersonalDataTask extends AbstractSetupTask {
 
     /** Key to retrieve email address from the user preferences. */
     public static final String EMAIL_KEY = KEY + ".email";
-
-    private static final Logger LOG = LoggerFactory
-            .getLogger(SetPersonalDataTask.class);
 
     @XmlAttribute(name = "first-name")
     @NotEmpty(message = "{first-name.empty}", groups = { UserInput.class })
@@ -172,21 +164,7 @@ public final class SetPersonalDataTask extends AbstractSetupTask {
 
     @Override
     public void execute() {
-
-        MDC.put(MDC_TASK_KEY, getType());
-        try {
-
-            if (!alreadyExecuted()) {
-                success();
-                LOG.info(
-                        "Successfully saved the personal data: firstName='{}', lastName='{}', email='{}'",
-                        firstName, lastName, email);
-            }
-
-        } finally {
-            MDC.remove(MDC_TASK_KEY);
-        }
-
+        // Nothing to do - Just user input
     }
 
     @Override

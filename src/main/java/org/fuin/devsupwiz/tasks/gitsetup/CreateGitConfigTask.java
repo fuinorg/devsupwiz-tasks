@@ -184,24 +184,19 @@ public final class CreateGitConfigTask extends AbstractSetupTask {
         MDC.put(MDC_TASK_KEY, getType());
         try {
 
-            if (!alreadyExecuted()) {
-                final String str = "[user]\n" + "\tname = " + name + "\n"
-                        + "\temail = " + email + "\n" + "[push]\n"
-                        + "\tdefault = " + pushDefault.name().toLowerCase()
-                        + "\n";
-                try {
+            final String str = "[user]\n" + "\tname = " + name + "\n"
+                    + "\temail = " + email + "\n" + "[push]\n"
+                    + "\tdefault = " + pushDefault.name().toLowerCase()
+                    + "\n";
+            try {
 
-                    FileUtils.writeStringToFile(configFile, str,
-                            Charset.forName("utf-8"));
+                FileUtils.writeStringToFile(configFile, str,
+                        Charset.forName("utf-8"));
 
-                    success();
-                    LOG.info("Successfully create git config: {}", configFile);
-
-                } catch (final IOException ex) {
-                    throw new RuntimeException(
-                            "Wasn't able to write git config: " + configFile,
-                            ex);
-                }
+            } catch (final IOException ex) {
+                throw new RuntimeException(
+                        "Wasn't able to write git config: " + configFile,
+                        ex);
             }
 
         } finally {

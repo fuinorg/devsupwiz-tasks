@@ -39,8 +39,6 @@ import org.fuin.devsupwiz.common.AbstractSetupTask;
 import org.fuin.devsupwiz.common.DevSupWizUtils;
 import org.fuin.devsupwiz.common.UserInput;
 import org.fuin.utils4j.Utils4J;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 /**
@@ -55,9 +53,6 @@ public final class CreateMavenSettingsTask extends AbstractSetupTask {
 
     /** Unique normalized name of the task (for example used for FXML file). */
     static final String KEY = "create-maven-settings";
-
-    private static final Logger LOG = LoggerFactory
-            .getLogger(CreateMavenSettingsTask.class);
 
     @NotEmpty(message = "{create-maven-settings.template.empty}")
     @XmlAttribute(name = "template")
@@ -203,41 +198,33 @@ public final class CreateMavenSettingsTask extends AbstractSetupTask {
         MDC.put(MDC_TASK_KEY, getType());
         try {
 
-            if (!alreadyExecuted()) {
-
-                if (!settingsFile.getParentFile().exists()) {
-                    if (!settingsFile.getParentFile().mkdir()) {
-                        throw new RuntimeException(
-                                "Wasn't able to create Maven directory: "
-                                        + settingsFile.getParent());
-                    }
-                }
-
-                try {
-                    final String str = FileUtils.readFileToString(
-                            getTemplateFile(), Charset.forName("utf-8"));
-                    final String nameReplaced = StringUtils.replace(str,
-                            "((USER))", name);
-                    final String pwAndNameReplaced = StringUtils
-                            .replace(nameReplaced, "((PW))", password);
-
-                    FileUtils.writeStringToFile(settingsFile, pwAndNameReplaced,
-                            Charset.forName("utf-8"));
-
-                    // Only owner is allowed to access settings.xml with repo pw
-                    DevSupWizUtils.setFilePermissions(settingsFile, OWNER_READ,
-                            OWNER_WRITE);
-
-                    success();
-                    LOG.info("Successfully create Maven settings: {}",
-                            settingsFile);
-
-                } catch (final IOException ex) {
+            if (!settingsFile.getParentFile().exists()) {
+                if (!settingsFile.getParentFile().mkdir()) {
                     throw new RuntimeException(
-                            "Wasn't able to write Maven settings: "
-                                    + settingsFile,
-                            ex);
+                            "Wasn't able to create Maven directory: "
+                                    + settingsFile.getParent());
                 }
+            }
+
+            try {
+                final String str = FileUtils.readFileToString(getTemplateFile(),
+                        Charset.forName("utf-8"));
+                final String nameReplaced = StringUtils.replace(str, "((USER))",
+                        name);
+                final String pwAndNameReplaced = StringUtils
+                        .replace(nameReplaced, "((PW))", password);
+
+                FileUtils.writeStringToFile(settingsFile, pwAndNameReplaced,
+                        Charset.forName("utf-8"));
+
+                // Only owner is allowed to access settings.xml with repo pw
+                DevSupWizUtils.setFilePermissions(settingsFile, OWNER_READ,
+                        OWNER_WRITE);
+
+            } catch (final IOException ex) {
+                throw new RuntimeException(
+                        "Wasn't able to write Maven settings: " + settingsFile,
+                        ex);
             }
 
         } finally {

@@ -40,8 +40,6 @@ import org.fuin.devsupwiz.common.LogOutputStream;
 import org.fuin.devsupwiz.common.MultipleInstancesSetupTask;
 import org.fuin.devsupwiz.common.ShellCommandExecutor;
 import org.fuin.utils4j.Utils4J;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.event.Level;
 
@@ -57,9 +55,6 @@ public final class GitCloneTask extends AbstractSetupTask
 
     /** Unique normalized name of the task (for example used for FXML file). */
     static final String KEY = "git-clone";
-
-    private static final Logger LOG = LoggerFactory
-            .getLogger(GitCloneTask.class);
 
     @NotEmpty
     @XmlAttribute(name = "id")
@@ -149,31 +144,23 @@ public final class GitCloneTask extends AbstractSetupTask
         MDC.put(MDC_TASK_KEY, getTypeId());
         try {
 
-            if (!alreadyExecuted()) {
+            if (!getTargetDirFile().exists()) {
+                getTargetDirFile().mkdirs();
+            }
 
-                if (!getTargetDirFile().exists()) {
-                    getTargetDirFile().mkdirs();
+            for (final String repository : repositories) {
+
+                final ShellCommandExecutor executor = new ShellCommandExecutor(
+                        "git clone -v " + repository, 120,
+                        new HashMap<String, String>(),
+                        new LogOutputStream(Level.INFO),
+                        new LogOutputStream(Level.ERROR), getTargetDirFile());
+
+                final int result = executor.execute();
+                if (result != 0) {
+                    throw new RuntimeException(
+                            "Failed to clone " + repository + ": " + result);
                 }
-
-                for (final String repository : repositories) {
-
-                    final ShellCommandExecutor executor = new ShellCommandExecutor(
-                            "git clone -v " + repository, 120,
-                            new HashMap<String, String>(),
-                            new LogOutputStream(Level.INFO),
-                            new LogOutputStream(Level.ERROR),
-                            getTargetDirFile());
-
-                    final int result = executor.execute();
-                    if (result != 0) {
-                        throw new RuntimeException("Failed to clone "
-                                + repository + ": " + result);
-                    }
-
-                }
-
-                success();
-                LOG.info("Successfully finished SSH git setup");
 
             }
 

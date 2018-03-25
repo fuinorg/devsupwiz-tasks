@@ -33,8 +33,6 @@ import org.fuin.devsupwiz.common.AbstractSetupTask;
 import org.fuin.devsupwiz.common.LogOutputStream;
 import org.fuin.devsupwiz.common.ShellCommandExecutor;
 import org.fuin.devsupwiz.common.UserInput;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.event.Level;
 
@@ -48,9 +46,6 @@ public final class SetHostnameTask extends AbstractSetupTask {
 
     /** Unique normalized name of the task (for example used for FXML file). */
     static final String KEY = "set-hostname";
-
-    private static final Logger LOG = LoggerFactory
-            .getLogger(SetHostnameTask.class);
 
     @XmlAttribute(name = "name")
     @Pattern(regexp = "[a-z][a-z0-9\\-]*", message = "{set-hostname.pattern}")
@@ -100,24 +95,17 @@ public final class SetHostnameTask extends AbstractSetupTask {
         MDC.put(MDC_TASK_KEY, getType());
         try {
 
-            if (!alreadyExecuted()) {
+            final ShellCommandExecutor executor = new ShellCommandExecutor(
+                    "hostnamectl set-hostname '" + name + "'", 5,
+                    new HashMap<String, String>(),
+                    new LogOutputStream(Level.INFO),
+                    new LogOutputStream(Level.ERROR));
 
-                final ShellCommandExecutor executor = new ShellCommandExecutor(
-                        "hostnamectl set-hostname '" + name + "'", 5,
-                        new HashMap<String, String>(),
-                        new LogOutputStream(Level.INFO),
-                        new LogOutputStream(Level.ERROR));
-
-                final int result = executor.execute();
-                if (result == 0) {
-                    success();
-                    LOG.info("Successfully set the host name to '{}'", name);
-                } else {
-                    LOG.error(
-                            "Error # {} while trying to set the host name to '{}'",
-                            result, name);
-                }
-
+            final int result = executor.execute();
+            if (result != 0) {
+                throw new RuntimeException("Error # " + result
+                        + " while trying to set the host name to '" + name
+                        + "'");
             }
 
         } finally {

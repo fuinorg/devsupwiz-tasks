@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 /**
- * Generates an SSH key pair and adds it to the "~/.ssh/config" file. 
+ * Generates an SSH key pair and adds it to the "~/.ssh/config" file.
  */
 @Vetoed
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -178,27 +178,16 @@ public final class GenerateSshKeyTask extends AbstractSetupTask
         MDC.put(MDC_TASK_KEY, getTypeId());
         try {
 
-            if (alreadyExecuted()) {
-                LOG.debug("Task already executed: " + getTypeId());
+            init();
 
-            } else {
-                LOG.debug("Task not executed: " + getTypeId());
+            final SshKeyPairGenerator generator = generateKeys(sshDir,
+                    getPrivateKeyFile(), getPublicKeyFile());
+            appendToConfig(getPrivateKeyFile());
+            publicKey = generator.getPublicKey();
 
-                init();
-
-                final SshKeyPairGenerator generator = generateKeys(sshDir,
-                        getPrivateKeyFile(), getPublicKeyFile());
-                appendToConfig(getPrivateKeyFile());
-                publicKey = generator.getPublicKey();
-
-                // Only add in productiion mode (not test)
-                if (sshDir.equals(getDefaultSshDir())) {
-                    DevSupWizUtils.addToSshKnownHosts(host);
-                }
-
-                success();
-                LOG.info("Successfully finished SSH git setup");
-
+            // Only add in productiion mode (not test)
+            if (sshDir.equals(getDefaultSshDir())) {
+                DevSupWizUtils.addToSshKnownHosts(host);
             }
 
         } finally {
