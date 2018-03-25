@@ -19,6 +19,7 @@ package org.fuin.devsupwiz.tasks.gitsetup;
 
 import static org.fuin.devsupwiz.common.DevSupWizUtils.getString;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -56,6 +58,9 @@ public class DisplaySshKeyController implements Initializable, SetupController {
 
     @FXML
     private TextField host;
+
+    @FXML
+    private Hyperlink link;
 
     @FXML
     private TextArea key;
@@ -102,13 +107,28 @@ public class DisplaySshKeyController implements Initializable, SetupController {
             LOG.warn("Referenced task not found: {}", this.task.getTaskRef());
         } else if (keyGenTask.alreadyExecuted()) {
             LOG.debug("Referenced task executed: {}", this.task.getTaskRef());
+
             name.setText(keyGenTask.getName());
             host.setText(keyGenTask.getHost());
             key.setText(keyGenTask.getPublicKey());
+
+            if ("github.com".equals(keyGenTask.getHost())) {
+                link.setText("https://github.com/settings/keys");
+                link.setDisable(false);
+            } else if ("bitbucket.org".equals(keyGenTask.getHost())) {
+                link.setText("https://bitbucket.org/account/user/" + name
+                        + "/ssh-keys/");
+                link.setDisable(false);
+            } else {
+                link.setText("");
+                link.setDisable(true);
+            }
+
         } else {
             LOG.debug("Referenced task not executed: {}",
                     this.task.getTaskRef());
         }
+
     }
 
     @Override
@@ -119,6 +139,16 @@ public class DisplaySshKeyController implements Initializable, SetupController {
     @Override
     public void refreshStatus() {
         displayData();
+    }
+
+    @FXML
+    public void openLink() {
+        try {
+            new ProcessBuilder("x-www-browser", link.getText()).start();
+        } catch (final IOException ex) {
+            throw new RuntimeException("Cannot open link: " + link.getText(),
+                    ex);
+        }
     }
 
 }

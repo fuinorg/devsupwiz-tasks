@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
@@ -10,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.fuin.devsupwiz.tasks.gitsetup.DisplaySshKeyController">
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" spacing="5.0" xmlns="http://javafx.com/javafx/9" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.fuin.devsupwiz.tasks.gitsetup.DisplaySshKeyController">
    <children>
       <Label id="title" fx:id="title" text="%title">
          <font>
@@ -39,6 +40,10 @@
          </children>
       </GridPane>
       <Label text="%key" />
+      <Hyperlink id="link" fx:id="link" onAction="#openLink" text="Hyperlink" />
       <TextArea id="key" fx:id="key" editable="false" prefHeight="200.0" prefWidth="200.0" wrapText="true" />
    </children>
+   <opaqueInsets>
+      <Insets />
+   </opaqueInsets>
 </VBox>
