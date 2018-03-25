@@ -17,6 +17,7 @@
  */
 package org.fuin.devsupwiz.tasks.gitsetup;
 
+import static org.fuin.devsupwiz.common.DevSupWizUtils.MDC_TASK_KEY;
 import static org.fuin.devsupwiz.common.DevSupWizUtils.getString;
 
 import java.io.IOException;
@@ -28,15 +29,17 @@ import java.util.ResourceBundle;
 import javax.inject.Inject;
 
 import org.fuin.devsupwiz.common.Config;
+import org.fuin.devsupwiz.common.DevSupWizFxUtils;
 import org.fuin.devsupwiz.common.Loggable;
 import org.fuin.devsupwiz.common.SetupController;
 import org.fuin.devsupwiz.common.SetupTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -60,7 +63,10 @@ public class DisplaySshKeyController implements Initializable, SetupController {
     private TextField host;
 
     @FXML
-    private Hyperlink link;
+    private Label copyAndPasteLabel;
+
+    @FXML
+    private Button link;
 
     @FXML
     private TextArea key;
@@ -72,10 +78,13 @@ public class DisplaySshKeyController implements Initializable, SetupController {
 
     private ResourceBundle bundle;
 
+    private String url;
+
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
         this.bundle = resources;
         title.setText(getString(bundle, "title", config.getName()));
+        copyAndPasteLabel.setGraphic(DevSupWizFxUtils.createIconInfo24x24());
     }
 
     @Override
@@ -113,15 +122,12 @@ public class DisplaySshKeyController implements Initializable, SetupController {
             key.setText(keyGenTask.getPublicKey());
 
             if ("github.com".equals(keyGenTask.getHost())) {
-                link.setText("https://github.com/settings/keys");
-                link.setDisable(false);
+                url = "https://github.com/settings/keys";
             } else if ("bitbucket.org".equals(keyGenTask.getHost())) {
-                link.setText("https://bitbucket.org/account/user/" + name
-                        + "/ssh-keys/");
-                link.setDisable(false);
+                url = "https://bitbucket.org/account/user/" + name
+                        + "/ssh-keys/";
             } else {
-                link.setText("");
-                link.setDisable(true);
+                url = "https://" + host;
             }
 
         } else {
@@ -144,10 +150,15 @@ public class DisplaySshKeyController implements Initializable, SetupController {
     @FXML
     public void openLink() {
         try {
-            new ProcessBuilder("x-www-browser", link.getText()).start();
-        } catch (final IOException ex) {
-            throw new RuntimeException("Cannot open link: " + link.getText(),
-                    ex);
+            MDC.put(MDC_TASK_KEY, DisplaySshKeyTask.KEY);
+            try {
+                LOG.info("Opening URL in broser: " + url);
+                new ProcessBuilder("x-www-browser", url).start();
+            } catch (final IOException ex) {
+                throw new RuntimeException("Cannot open link: " + url, ex);
+            }
+        } finally {
+            MDC.remove(MDC_TASK_KEY);
         }
     }
 

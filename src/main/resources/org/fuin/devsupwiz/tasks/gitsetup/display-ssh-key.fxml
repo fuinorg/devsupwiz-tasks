@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
@@ -34,14 +34,24 @@
          </padding>
          <children>
             <Label text="%name" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <TextField id="name" fx:id="name" editable="false" promptText="peter_parker" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <TextField id="name" fx:id="name" disable="true" promptText="peter_parker" GridPane.columnIndex="2" GridPane.rowIndex="1" />
             <Label text="%host" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <TextField id="host" fx:id="host" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <TextField id="host" fx:id="host" disable="true" GridPane.columnIndex="2" GridPane.rowIndex="2" />
          </children>
       </GridPane>
-      <Label text="%key" />
-      <Hyperlink id="link" fx:id="link" onAction="#openLink" text="Hyperlink" />
+      <Label id="copyAndPasteLabel" fx:id="copyAndPasteLabel" text="%key">
+         <VBox.margin>
+            <Insets bottom="5.0" />
+         </VBox.margin>
+         <font>
+            <Font name="System Bold" size="13.0" />
+         </font></Label>
       <TextArea id="key" fx:id="key" editable="false" prefHeight="200.0" prefWidth="200.0" wrapText="true" />
+      <Button id="link" fx:id="link" mnemonicParsing="false" onAction="#openLink" text="Open &quot;SSH Keys&quot; page in Browser">
+         <VBox.margin>
+            <Insets bottom="10.0" top="5.0" />
+         </VBox.margin>
+      </Button>
    </children>
    <opaqueInsets>
       <Insets />

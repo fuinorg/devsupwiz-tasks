@@ -60,7 +60,8 @@ public final class DisplaySshKeyTask extends AbstractSetupTask
      * @param id
      *            Unique task identifier.
      * @param taskRef
-     *            Reference to the {@link GenerateSshKeyTask} to display it's public key.
+     *            Reference to the {@link GenerateSshKeyTask} to display it's
+     *            public key.
      */
     public DisplaySshKeyTask(@NotEmpty final String id,
             @NotEmpty final String taskRef) {
