@@ -33,12 +33,12 @@
          </padding>
          <children>
             <Label text="%name" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <TextField id="name" fx:id="name" promptText="peter_parker" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <TextField id="name" fx:id="name" editable="false" promptText="peter_parker" GridPane.columnIndex="2" GridPane.rowIndex="1" />
             <Label text="%host" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <TextField id="host" fx:id="host" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <TextField id="host" fx:id="host" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="2" />
          </children>
       </GridPane>
       <Label text="%key" />
-      <TextArea id="key" fx:id="key" prefHeight="200.0" prefWidth="200.0" wrapText="true" />
+      <TextArea id="key" fx:id="key" editable="false" prefHeight="200.0" prefWidth="200.0" wrapText="true" />
    </children>
 </VBox>
