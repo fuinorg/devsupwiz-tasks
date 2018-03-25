@@ -90,6 +90,7 @@ Add the following to your .m2/settings.xml to enable snapshots in your Maven bui
         <enabled>false</enabled>
     </releases>
     <snapshots>
+        <updatePolicy>always</updatePolicy>
         <enabled>true</enabled>
     </snapshots>
 </repository>
