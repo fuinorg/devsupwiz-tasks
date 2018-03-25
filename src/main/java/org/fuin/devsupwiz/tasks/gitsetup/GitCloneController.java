@@ -61,9 +61,6 @@ public class GitCloneController implements SetupController {
                             + ", but was: " + setupTask.getClass().getName());
         }
         task = (GitCloneTask) setupTask;
-        repoList = FXCollections.observableArrayList(task.getRepositories());
-        repositories.setItems(repoList);
-        directory.setText(task.getTargetDir());
         refreshStatus();
     }
 
@@ -76,7 +73,13 @@ public class GitCloneController implements SetupController {
     public void save() {
         // Nothing to to
     }
-
+    
+    private void displayData(final boolean alreadyExecuted) {
+        repoList = FXCollections.observableArrayList(task.getRepositories());
+        repositories.setItems(repoList);
+        directory.setText(task.getTargetDir());
+    }
+    
     @Override
     public SetupTask getTask() {
         return task;
@@ -85,6 +88,7 @@ public class GitCloneController implements SetupController {
     @Override
     public void refreshStatus() {
         final boolean alreadyExecuted = task.alreadyExecuted();
+        displayData(alreadyExecuted);
         repositories.setDisable(alreadyExecuted);
         directory.setDisable(alreadyExecuted);
         if (alreadyExecuted) {

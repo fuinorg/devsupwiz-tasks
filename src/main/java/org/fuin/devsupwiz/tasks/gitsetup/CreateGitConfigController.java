@@ -57,8 +57,9 @@ import javafx.scene.control.TextField;
 public class CreateGitConfigController
         implements Initializable, SetupController {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CreateGitConfigController.class);
-    
+    private static final Logger LOG = LoggerFactory
+            .getLogger(CreateGitConfigController.class);
+
     @FXML
     private TextField name;
 
@@ -73,7 +74,7 @@ public class CreateGitConfigController
 
     @Inject
     private Validator validator;
-    
+
     @Inject
     private Config config;
 
@@ -87,17 +88,6 @@ public class CreateGitConfigController
                     + task.getClass().getName());
         }
         this.task = (CreateGitConfigTask) task;
-        
-        if (!task.alreadyExecuted()) {
-            final SetPersonalDataTask pdTask = config.findTask(SetPersonalDataTask.KEY);
-            if (pdTask == null) {
-                LOG.warn("Referenced task not found: {}", SetPersonalDataTask.KEY);
-            } else {
-                LOG.debug("Referenced task: {}", SetPersonalDataTask.KEY);
-                name.setText(pdTask.getFullName());
-            }
-        }
-        
         refreshStatus();
     }
 
@@ -153,6 +143,29 @@ public class CreateGitConfigController
         task.setPushDefault(PushDefault.valueOf(selected));
     }
 
+    private void displayData(final boolean alreadyExecuted) {
+        if (alreadyExecuted) {
+            name.setText(task.getName());
+            email.setText(task.getEmail());
+        } else {
+            final SetPersonalDataTask pdTask = config
+                    .findTask(SetPersonalDataTask.KEY);
+            if (pdTask == null) {
+                LOG.warn("Referenced task not found: {}",
+                        SetPersonalDataTask.KEY);
+            } else if (pdTask.alreadyExecuted()) {
+                LOG.debug("Referenced task executed: {}",
+                        SetPersonalDataTask.KEY);
+                name.setText(pdTask.getFullName());
+                email.setText(pdTask.getEmail());
+            } else {
+                LOG.debug("Referenced task not executed: {}",
+                        SetPersonalDataTask.KEY);
+            }
+        }
+        pushDefault.setValue(task.getPushDefault().name().toLowerCase());
+    }
+
     @Override
     public SetupTask getTask() {
         return task;
@@ -161,6 +174,7 @@ public class CreateGitConfigController
     @Override
     public void refreshStatus() {
         final boolean alreadyExecuted = task.alreadyExecuted();
+        displayData(alreadyExecuted);
         name.setDisable(alreadyExecuted);
         email.setDisable(alreadyExecuted);
         pushDefault.setDisable(alreadyExecuted);

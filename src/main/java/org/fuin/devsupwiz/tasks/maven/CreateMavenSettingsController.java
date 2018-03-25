@@ -114,6 +114,10 @@ public class CreateMavenSettingsController implements SetupController {
         task.setPassword(password.getText());
     }
 
+    private void displayData() {
+        name.setText(task.getName());
+    }
+    
     @Override
     public SetupTask getTask() {
         return task;
@@ -122,6 +126,7 @@ public class CreateMavenSettingsController implements SetupController {
     @Override
     public void refreshStatus() {
         final boolean alreadyExecuted = task.alreadyExecuted();
+        displayData();
         name.setDisable(alreadyExecuted);
         password.setDisable(alreadyExecuted);
         if (alreadyExecuted) {

@@ -129,6 +129,12 @@ public class SetPersonalDataController implements SetupController {
         task.setEmail(email.getText());
     }
 
+    private void displayData() {
+        firstName.setText(task.getFirstName());
+        lastName.setText(task.getLastName());
+        email.setText(task.getEmail());
+    }
+
     @Override
     public SetupTask getTask() {
         return task;
@@ -137,6 +143,7 @@ public class SetPersonalDataController implements SetupController {
     @Override
     public void refreshStatus() {
         final boolean alreadyExecuted = task.alreadyExecuted();
+        displayData();
         firstName.setDisable(alreadyExecuted);
         lastName.setDisable(alreadyExecuted);
         email.setDisable(alreadyExecuted);

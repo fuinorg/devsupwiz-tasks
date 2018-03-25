@@ -115,6 +115,11 @@ public class GenerateSshKeyController implements SetupController {
         task.setName(name.getText());
         task.setHost(host.getText());
     }
+    
+    private void displayData() {
+        name.setText(task.getName());
+        host.setText(task.getHost());
+    }
 
     @Override
     public SetupTask getTask() {
@@ -124,6 +129,7 @@ public class GenerateSshKeyController implements SetupController {
     @Override
     public void refreshStatus() {
         final boolean alreadyExecuted = task.alreadyExecuted();
+        displayData();
         name.setDisable(alreadyExecuted);
         host.setDisable(alreadyExecuted);
         if (alreadyExecuted) {

@@ -30,6 +30,8 @@ import org.fuin.devsupwiz.common.Config;
 import org.fuin.devsupwiz.common.Loggable;
 import org.fuin.devsupwiz.common.SetupController;
 import org.fuin.devsupwiz.common.SetupTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -42,6 +44,9 @@ import javafx.scene.control.TextField;
  */
 @Loggable
 public class DisplaySshKeyController implements Initializable, SetupController {
+
+    private static final Logger LOG = LoggerFactory
+            .getLogger(DisplaySshKeyController.class);
 
     @FXML
     private Label title;
@@ -76,19 +81,7 @@ public class DisplaySshKeyController implements Initializable, SetupController {
                             + ", but was: " + task.getClass().getName());
         }
         this.task = (DisplaySshKeyTask) task;
-        
-        final GenerateSshKeyTask keyGenTask = config
-                .findTask(this.task.getTaskRef());
-        if (keyGenTask == null) {
-            throw new IllegalStateException(
-                    "Wasn't able to find task: '" + this.task.getTaskRef() + "'");
-        } else {
-            name.setText(keyGenTask.getName());
-            host.setText(keyGenTask.getHost());
-            key.setText(keyGenTask.getPublicKey());
-        }
 
-        
         refreshStatus();
     }
 
@@ -102,6 +95,22 @@ public class DisplaySshKeyController implements Initializable, SetupController {
         // Do nothing
     }
 
+    private void displayData() {
+        final GenerateSshKeyTask keyGenTask = config
+                .findTask(this.task.getTaskRef());
+        if (keyGenTask == null) {
+            LOG.warn("Referenced task not found: {}", this.task.getTaskRef());
+        } else if (keyGenTask.alreadyExecuted()) {
+            LOG.debug("Referenced task executed: {}", this.task.getTaskRef());
+            name.setText(keyGenTask.getName());
+            host.setText(keyGenTask.getHost());
+            key.setText(keyGenTask.getPublicKey());
+        } else {
+            LOG.debug("Referenced task not executed: {}",
+                    this.task.getTaskRef());
+        }
+    }
+
     @Override
     public SetupTask getTask() {
         return task;
@@ -109,7 +118,7 @@ public class DisplaySshKeyController implements Initializable, SetupController {
 
     @Override
     public void refreshStatus() {
-        // Do nothing
+        displayData();
     }
 
 }

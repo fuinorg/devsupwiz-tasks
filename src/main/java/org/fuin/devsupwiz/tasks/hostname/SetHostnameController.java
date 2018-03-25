@@ -112,6 +112,10 @@ public class SetHostnameController implements SetupController {
         task.setName(name.getText());
     }
 
+    private void displayData() {
+        name.setText(task.getName());
+    }
+
     @Override
     public SetupTask getTask() {
         return task;
@@ -120,6 +124,7 @@ public class SetHostnameController implements SetupController {
     @Override
     public void refreshStatus() {
         final boolean alreadyExecuted = task.alreadyExecuted();
+        displayData();
         name.setDisable(alreadyExecuted);
         if (alreadyExecuted) {
             title.setGraphic(createIconOk24x24());
