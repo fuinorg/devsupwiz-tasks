@@ -48,7 +48,7 @@ public final class SetHostnameTask extends AbstractSetupTask {
     static final String KEY = "set-hostname";
 
     @XmlAttribute(name = "name")
-    @Pattern(regexp = "[a-z][a-z0-9\\-]*", message = "{set-hostname.pattern}")
+    @Pattern(regexp = "[a-z][a-z0-9\\-]*", message = "{set-hostname.pattern}", groups = { UserInput.class })
     @NotEmpty(message = "{set-hostname.empty}", groups = { UserInput.class })
     private String name;
 
@@ -95,17 +95,12 @@ public final class SetHostnameTask extends AbstractSetupTask {
         MDC.put(MDC_TASK_KEY, getType());
         try {
 
-            final ShellCommandExecutor executor = new ShellCommandExecutor(
-                    "hostnamectl set-hostname '" + name + "'", 5,
-                    new HashMap<String, String>(),
-                    new LogOutputStream(Level.INFO),
-                    new LogOutputStream(Level.ERROR));
+            final ShellCommandExecutor executor = new ShellCommandExecutor("hostnamectl set-hostname '" + name + "'", 5,
+                    new HashMap<String, String>(), new LogOutputStream(Level.INFO), new LogOutputStream(Level.ERROR));
 
             final int result = executor.execute();
             if (result != 0) {
-                throw new RuntimeException("Error # " + result
-                        + " while trying to set the host name to '" + name
-                        + "'");
+                throw new RuntimeException("Error # " + result + " while trying to set the host name to '" + name + "'");
             }
 
         } finally {
@@ -116,8 +111,7 @@ public final class SetHostnameTask extends AbstractSetupTask {
 
     @Override
     public final String getResource() {
-        return this.getClass().getPackage().getName().replace('.', '/') + "/"
-                + KEY;
+        return this.getClass().getPackage().getName().replace('.', '/') + "/" + KEY;
     }
 
     @Override
