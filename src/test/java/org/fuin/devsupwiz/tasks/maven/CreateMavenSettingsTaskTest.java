@@ -77,12 +77,18 @@ public class CreateMavenSettingsTaskTest {
         final CreateMavenSettingsTask testee = new CreateMavenSettingsTask();
 
         final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-        final Set<ConstraintViolation<CreateMavenSettingsTask>> violations = validator.validate(testee, Default.class, UserInput.class);
+        Set<ConstraintViolation<CreateMavenSettingsTask>> violations = validator.validate(testee, Default.class, UserInput.class);
+
+        assertThat(DevSupWizUtils.violated(violations, "template")).isTrue();
+        assertThat(DevSupWizUtils.violated(violations, "name")).isFalse();
+        assertThat(DevSupWizUtils.violated(violations, "password")).isFalse();
+
+        violations = validator.validate(testee, Default.class, CredentialsEnabled.class);
 
         assertThat(DevSupWizUtils.violated(violations, "template")).isTrue();
         assertThat(DevSupWizUtils.violated(violations, "name")).isTrue();
         assertThat(DevSupWizUtils.violated(violations, "password")).isTrue();
-
+        
     }
 
     @Test
