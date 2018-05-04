@@ -29,13 +29,13 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import javax.validation.groups.Default;
 
 import org.controlsfx.control.decoration.Decorator;
 import org.controlsfx.control.decoration.GraphicDecoration;
 import org.fuin.devsupwiz.common.Loggable;
 import org.fuin.devsupwiz.common.SetupController;
 import org.fuin.devsupwiz.common.SetupTask;
-import org.fuin.devsupwiz.common.UserInput;
 
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
@@ -58,6 +58,9 @@ public class CreateMavenSettingsController implements SetupController {
     @FXML
     private Label title;
 
+    @FXML
+    private Label hint;
+
     @Inject
     private Validator validator;
 
@@ -66,9 +69,8 @@ public class CreateMavenSettingsController implements SetupController {
     @Override
     public void init(final SetupTask task) {
         if (!(task instanceof CreateMavenSettingsTask)) {
-            throw new IllegalArgumentException("Expected task of type "
-                    + CreateMavenSettingsTask.class.getName() + ", but was: "
-                    + task.getClass().getName());
+            throw new IllegalArgumentException(
+                    "Expected task of type " + CreateMavenSettingsTask.class.getName() + ", but was: " + task.getClass().getName());
         }
         this.task = (CreateMavenSettingsTask) task;
         refreshStatus();
@@ -82,10 +84,13 @@ public class CreateMavenSettingsController implements SetupController {
         if (!task.alreadyExecuted()) {
 
             // Execute bean validation using a new task instance
-            final CreateMavenSettingsTask t = new CreateMavenSettingsTask("y",
-                    name.getText(), password.getText());
-            final Set<ConstraintViolation<CreateMavenSettingsTask>> violations = validator
-                    .validate(t, UserInput.class);
+            final CreateMavenSettingsTask t = new CreateMavenSettingsTask("y", name.getText(), password.getText());
+            final Set<ConstraintViolation<CreateMavenSettingsTask>> violations;
+            if (task.isSkipCredentials()) {
+                violations = validator.validate(t, Default.class);
+            } else {
+                violations = validator.validate(t, CredentialsEnabled.class);
+            }
             for (final ConstraintViolation<CreateMavenSettingsTask> violation : violations) {
                 errors.add(violation.getMessage());
             }
@@ -93,13 +98,11 @@ public class CreateMavenSettingsController implements SetupController {
             // Show validation errors on UI
             Decorator.removeAllDecorations(name);
             if (violated(violations, name.getId())) {
-                Decorator.addDecoration(name, new GraphicDecoration(
-                        createIconError16x16(), Pos.TOP_RIGHT));
+                Decorator.addDecoration(name, new GraphicDecoration(createIconError16x16(), Pos.TOP_RIGHT));
             }
             Decorator.removeAllDecorations(password);
             if (violated(violations, password.getId())) {
-                Decorator.addDecoration(password, new GraphicDecoration(
-                        createIconError16x16(), Pos.TOP_RIGHT));
+                Decorator.addDecoration(password, new GraphicDecoration(createIconError16x16(), Pos.TOP_RIGHT));
             }
 
         }
@@ -116,8 +119,9 @@ public class CreateMavenSettingsController implements SetupController {
 
     private void displayData() {
         name.setText(task.getName());
+        hint.setText(task.getHint());
     }
-    
+
     @Override
     public SetupTask getTask() {
         return task;
@@ -127,8 +131,8 @@ public class CreateMavenSettingsController implements SetupController {
     public void refreshStatus() {
         final boolean alreadyExecuted = task.alreadyExecuted();
         displayData();
-        name.setDisable(alreadyExecuted);
-        password.setDisable(alreadyExecuted);
+        name.setDisable(alreadyExecuted || task.isSkipCredentials());
+        password.setDisable(alreadyExecuted || task.isSkipCredentials());
         if (alreadyExecuted) {
             title.setGraphic(createIconOk24x24());
         } else {

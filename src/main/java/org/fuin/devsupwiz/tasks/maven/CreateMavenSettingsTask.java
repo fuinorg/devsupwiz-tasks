@@ -58,13 +58,17 @@ public final class CreateMavenSettingsTask extends AbstractSetupTask {
     @XmlAttribute(name = "template")
     private String template;
 
-    @NotEmpty(message = "{create-maven-settings.name.empty}", groups = {
-            UserInput.class })
+    @NotEmpty(message = "{create-maven-settings.name.empty}", groups = { CredentialsEnabled.class })
     @XmlAttribute(name = "name")
     private String name;
 
-    @NotEmpty(message = "{create-maven-settings.password.empty}", groups = {
-            UserInput.class })
+    @XmlAttribute(name = "hint")
+    private String hint;
+
+    @XmlAttribute(name = "skip-credentials")
+    private Boolean skipCredentials;
+
+    @NotEmpty(message = "{create-maven-settings.password.empty}", groups = { CredentialsEnabled.class })
     private transient String password;
 
     @NotNull(message = "settingsFile==null")
@@ -88,10 +92,8 @@ public final class CreateMavenSettingsTask extends AbstractSetupTask {
      * @param password
      *            User password.
      */
-    public CreateMavenSettingsTask(@NotEmpty final String template,
-            @NotEmpty final String name, @NotEmpty final String password) {
-        this(template, name, password,
-                new File(Utils4J.getUserHomeDir(), M2_SETTINGS_XML));
+    public CreateMavenSettingsTask(@NotEmpty final String template, @NotEmpty final String name, @NotEmpty final String password) {
+        this(template, name, password, new File(Utils4J.getUserHomeDir(), M2_SETTINGS_XML));
     }
 
     /**
@@ -106,8 +108,7 @@ public final class CreateMavenSettingsTask extends AbstractSetupTask {
      * @param settingsFile
      *            File to create.
      */
-    public CreateMavenSettingsTask(@NotEmpty final String template,
-            @NotEmpty final String name, @NotEmpty final String password,
+    public CreateMavenSettingsTask(@NotEmpty final String template, @NotEmpty final String name, @NotEmpty final String password,
             @NotNull final File settingsFile) {
         super();
         this.template = template;
@@ -142,14 +143,11 @@ public final class CreateMavenSettingsTask extends AbstractSetupTask {
      */
     public final File getTemplateFile() {
         if (template == null) {
-            throw new IllegalStateException(
-                    "The template name for the 'settings.xml' is not set");
+            throw new IllegalStateException("The template name for the 'settings.xml' is not set");
         }
-        final File file = new File(StringUtils.replace(template, "~",
-                Utils4J.getUserHomeDir().toString()));
+        final File file = new File(StringUtils.replace(template, "~", Utils4J.getUserHomeDir().toString()));
         if (!file.exists()) {
-            throw new IllegalStateException(
-                    "The template files does not exist: " + file);
+            throw new IllegalStateException("The template files does not exist: " + file);
         }
         return file;
     }
@@ -192,6 +190,58 @@ public final class CreateMavenSettingsTask extends AbstractSetupTask {
         this.password = password;
     }
 
+    /**
+     * Returns the hint what the Maven credentials are for.
+     * 
+     * @return Hint for the user what credentials to use.
+     */
+    public final String getHint() {
+        return hint;
+    }
+
+    /**
+     * Sets the hint what the Maven credentials are for.
+     * 
+     * @param hint
+     *            Hint for the user what credentials to use.
+     */
+    public final void setHint(final String hint) {
+        this.hint = hint;
+    }
+
+    /**
+     * Defines if no credentials are required.
+     * 
+     * @return TRUE if the user does not need to enter the credentials. In case
+     *         the value is <code>null</code> this defaults to FALSE.
+     */
+    public final boolean isSkipCredentials() {
+        if (skipCredentials == null) {
+            return false;
+        }
+        return skipCredentials;
+    }
+
+    /**
+     * Defines if no credentials are required.
+     * 
+     * @return TRUE if the user does not need to enter the credentials or
+     *         <code>null</code> if undefined.
+     */
+    public Boolean getSkipCredentials() {
+        return skipCredentials;
+    }
+
+    /**
+     * Defines if no credentials are required.
+     * 
+     * @param skipCredentials
+     *            TRUE if the user does not need to enter the credentials-
+     */
+    public final void setSkipCredentials(final Boolean skipCredentials) {
+        this.skipCredentials = skipCredentials;
+    }
+
     @Override
     public final void execute() {
 
@@ -200,31 +250,25 @@ public final class CreateMavenSettingsTask extends AbstractSetupTask {
 
             if (!settingsFile.getParentFile().exists()) {
                 if (!settingsFile.getParentFile().mkdir()) {
-                    throw new RuntimeException(
-                            "Wasn't able to create Maven directory: "
-                                    + settingsFile.getParent());
+                    throw new RuntimeException("Wasn't able to create Maven directory: " + settingsFile.getParent());
                 }
             }
 
             try {
-                final String str = FileUtils.readFileToString(getTemplateFile(),
-                        Charset.forName("utf-8"));
-                final String nameReplaced = StringUtils.replace(str, "((USER))",
-                        name);
-                final String pwAndNameReplaced = StringUtils
-                        .replace(nameReplaced, "((PW))", password);
-
-                FileUtils.writeStringToFile(settingsFile, pwAndNameReplaced,
-                        Charset.forName("utf-8"));
+                final String str = FileUtils.readFileToString(getTemplateFile(), Charset.forName("utf-8"));
+                if (isSkipCredentials()) {
+                    FileUtils.writeStringToFile(settingsFile, str, Charset.forName("utf-8"));
+                } else {
+                    final String nameReplaced = StringUtils.replace(str, "((USER))", name);
+                    final String pwAndNameReplaced = StringUtils.replace(nameReplaced, "((PW))", password);
+                    FileUtils.writeStringToFile(settingsFile, pwAndNameReplaced, Charset.forName("utf-8"));
+                }
 
                 // Only owner is allowed to access settings.xml with repo pw
-                DevSupWizUtils.setFilePermissions(settingsFile, OWNER_READ,
-                        OWNER_WRITE);
+                DevSupWizUtils.setFilePermissions(settingsFile, OWNER_READ, OWNER_WRITE);
 
             } catch (final IOException ex) {
-                throw new RuntimeException(
-                        "Wasn't able to write Maven settings: " + settingsFile,
-                        ex);
+                throw new RuntimeException("Wasn't able to write Maven settings: " + settingsFile, ex);
             }
 
         } finally {
@@ -235,8 +279,7 @@ public final class CreateMavenSettingsTask extends AbstractSetupTask {
 
     @Override
     public final String getResource() {
-        return this.getClass().getPackage().getName().replace('.', '/') + "/"
-                + KEY;
+        return this.getClass().getPackage().getName().replace('.', '/') + "/" + KEY;
     }
 
     @Override

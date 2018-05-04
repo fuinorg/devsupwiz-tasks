@@ -50,22 +50,15 @@ public class CreateMavenSettingsTaskTest {
         // PREPARE
         final Charset utf8 = Charset.forName("utf-8");
         final String template = IOUtils
-                .resourceToString(
-                        "/" + CreateMavenSettingsTask.class.getPackage()
-                                .getName().replace('.', '/') + "/settings.xml",
-                        utf8);
-        final File templateFile = File
-                .createTempFile("maven-settings-template-", ".xml");
+                .resourceToString("/" + CreateMavenSettingsTask.class.getPackage().getName().replace('.', '/') + "/settings.xml", utf8);
+        final File templateFile = File.createTempFile("maven-settings-template-", ".xml");
         FileUtils.write(templateFile, template, Charset.forName("utf-8"));
 
         final String expected = IOUtils.resourceToString(
-                "/" + CreateMavenSettingsTask.class.getPackage().getName()
-                        .replace('.', '/') + "/test-maven-settings.xml",
-                utf8);
+                "/" + CreateMavenSettingsTask.class.getPackage().getName().replace('.', '/') + "/test-maven-settings.xml", utf8);
         final File targetFile = new File("target/maven-settings.xml");
         targetFile.delete();
-        final CreateMavenSettingsTask testee = new CreateMavenSettingsTask(
-                templateFile.toString(), "peter.parker", "secret123",
+        final CreateMavenSettingsTask testee = new CreateMavenSettingsTask(templateFile.toString(), "peter.parker", "secret123",
                 targetFile);
         final ConfigImpl config = new ConfigImpl("test", testee);
         config.init();
@@ -83,10 +76,8 @@ public class CreateMavenSettingsTaskTest {
 
         final CreateMavenSettingsTask testee = new CreateMavenSettingsTask();
 
-        final Validator validator = Validation.buildDefaultValidatorFactory()
-                .getValidator();
-        final Set<ConstraintViolation<CreateMavenSettingsTask>> violations = validator
-                .validate(testee, Default.class, UserInput.class);
+        final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+        final Set<ConstraintViolation<CreateMavenSettingsTask>> violations = validator.validate(testee, Default.class, UserInput.class);
 
         assertThat(DevSupWizUtils.violated(violations, "template")).isTrue();
         assertThat(DevSupWizUtils.violated(violations, "name")).isTrue();
@@ -100,20 +91,20 @@ public class CreateMavenSettingsTaskTest {
         // PREPARE
         final File targetFile = new File("target/maven-settings.xml");
         targetFile.delete();
-        final CreateMavenSettingsTask testee = new CreateMavenSettingsTask(
-                "~/.m2/settings.xml", "peter.parker", "secret123", targetFile);
+        final CreateMavenSettingsTask testee = new CreateMavenSettingsTask("~/.m2/settings.xml", "peter.parker", "secret123", targetFile);
+        testee.setHint("Enter your JFrog credentials");
+        testee.setSkipCredentials(false);
 
         // TEST
-        final String xml = JaxbUtils.marshal(testee,
-                CreateMavenSettingsTask.class);
+        final String xml = JaxbUtils.marshal(testee, CreateMavenSettingsTask.class);
 
         // VERIFY
-        final Diff documentDiff = DiffBuilder.compare(JaxbUtils.XML_PREFIX
-                + "<create-maven-settings template=\"~/.m2/settings.xml\" name=\"peter.parker\"/>")
+        final Diff documentDiff = DiffBuilder
+                .compare(JaxbUtils.XML_PREFIX + "<create-maven-settings template=\"~/.m2/settings.xml\" name=\"peter.parker\" "
+                        + "skip-credentials=\"false\" hint=\"Enter your JFrog credentials\" />")
                 .withTest(xml).ignoreWhitespace().build();
 
-        assertThat(documentDiff.hasDifferences())
-                .describedAs(documentDiff.toString()).isFalse();
+        assertThat(documentDiff.hasDifferences()).describedAs(documentDiff.toString()).isFalse();
 
     }
 
@@ -124,8 +115,7 @@ public class CreateMavenSettingsTaskTest {
         final String xml = "<create-maven-settings id=\"x\" template=\"~/.m2/settings.xml\"/>";
 
         // TEST
-        final CreateMavenSettingsTask testee = JaxbUtils.unmarshal(xml,
-                CreateMavenSettingsTask.class);
+        final CreateMavenSettingsTask testee = JaxbUtils.unmarshal(xml, CreateMavenSettingsTask.class);
 
         // VERIFY
         assertThat(testee).isNotNull();
